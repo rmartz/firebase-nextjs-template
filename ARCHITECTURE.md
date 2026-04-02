@@ -65,32 +65,34 @@ project-root/
 
 ### Packages
 
-- `firebase` (client SDK) — real-time subscriptions via `onValue`
-- `firebase-admin` (server SDK) — data mutations via API routes
+- `firebase` (client SDK) — browser-side Firebase access
+- `firebase-admin` (server SDK) — server-side Firebase access via API routes
 
 ### Initialization
 
-Both SDKs are lazily initialized to avoid errors during static builds (CI has no env vars):
+Both SDKs are lazily initialized to avoid errors during static builds (CI has no env vars). The template provides product-agnostic app accessors — projects import the specific Firebase products they need (Realtime Database, Firestore, Auth, Storage, etc.) on top of these:
 
 ```typescript
 // Client: src/lib/firebase/client.ts
-function getClientApp() {
-  return getApps().find((a) => a.name === "[DEFAULT]") ?? initializeApp(config);
-}
+import { getClientApp } from "@/lib/firebase/client";
+import { getDatabase } from "firebase/database";
+// or: import { getFirestore } from "firebase/firestore";
+// or: import { getAuth } from "firebase/auth";
+
+const db = getDatabase(getClientApp());
 
 // Server: src/lib/firebase/admin.ts
-function initAdminApp() {
-  const existing = getApps().find((a) => a.name === "[DEFAULT]");
-  if (existing) return existing;
-  return initializeApp({ credential: cert({...}), databaseURL: ... });
-}
+import { getAdminApp } from "@/lib/firebase/admin";
+import { getDatabase } from "firebase-admin/database";
+
+const db = getDatabase(getAdminApp());
 ```
 
-Firestore/RTDB instances are accessed via function calls (`getClientDatabase()`, `getAdminDatabase()`), never module-level constants.
+Product instances should be accessed via function calls, never module-level constants.
 
-### Database Schema Pattern
+### Database Schema Pattern (Realtime Database)
 
-Separate public and private data at the path level:
+When using Realtime Database, separate public and private data at the path level:
 
 ```
 /{collection}/{id}/public    # World-readable data (client SDK subscribes here)
@@ -104,7 +106,7 @@ Separate public and private data at the path level:
 - `firebaseTo{Domain}()` converts Firebase snapshots back to domain objects with defaults
 - Boolean settings are always written explicitly (not sparse) and deserialized with `?? false`
 
-### Real-Time Updates
+### Real-Time Updates (Realtime Database)
 
 - Clients subscribe to Firebase RTDB paths via `onValue` (wrapped in custom hooks)
 - Server pre-computes per-user state and writes it to per-user paths — clients never need to derive state
