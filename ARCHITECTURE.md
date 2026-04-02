@@ -4,21 +4,21 @@ This document captures non-business-logic technical decisions, patterns, and inf
 
 ## Stack
 
-| Layer | Technology | Purpose |
-|---|---|---|
-| Framework | Next.js (App Router) | Fullstack React with SSR/API routes |
-| Language | TypeScript (strict mode) | Type safety throughout |
-| Package Manager | pnpm | Fast, disk-efficient dependency management |
-| UI Components | ShadCN UI + Tailwind CSS | Composable, accessible component primitives |
-| State (server) | TanStack Query | Server state caching, polling, invalidation |
-| State (client) | Redux Toolkit | Local UI state (forms, config panels) |
-| Database | Firebase Realtime Database | Persistent storage with real-time push |
-| Auth | Firebase Admin SDK (server) | Session-based auth via API routes |
-| Hosting | Vercel | Deployment, preview URLs, edge functions |
-| Testing | Vitest + @testing-library/react | Unit, component, and integration tests |
-| Visual Testing | Storybook 10 | Component development and visual documentation |
-| CI/CD | GitHub Actions | Lint, format, test, build on every PR |
-| Monitoring | Sentry | Error tracking (client + server + edge) |
+| Layer           | Technology                      | Purpose                                        |
+| --------------- | ------------------------------- | ---------------------------------------------- |
+| Framework       | Next.js (App Router)            | Fullstack React with SSR/API routes            |
+| Language        | TypeScript (strict mode)        | Type safety throughout                         |
+| Package Manager | pnpm                            | Fast, disk-efficient dependency management     |
+| UI Components   | ShadCN UI + Tailwind CSS        | Composable, accessible component primitives    |
+| State (server)  | TanStack Query                  | Server state caching, polling, invalidation    |
+| State (client)  | Redux Toolkit                   | Local UI state (forms, config panels)          |
+| Database        | Firebase Realtime Database      | Persistent storage with real-time push         |
+| Auth            | Firebase Admin SDK (server)     | Session-based auth via API routes              |
+| Hosting         | Vercel                          | Deployment, preview URLs, edge functions       |
+| Testing         | Vitest + @testing-library/react | Unit, component, and integration tests         |
+| Visual Testing  | Storybook 10                    | Component development and visual documentation |
+| CI/CD           | GitHub Actions                  | Lint, format, test, build on every PR          |
+| Monitoring      | Sentry                          | Error tracking (client + server + edge)        |
 
 ## Project Structure
 
@@ -64,10 +64,12 @@ project-root/
 ## Firebase Architecture
 
 ### Packages
+
 - `firebase` (client SDK) — real-time subscriptions via `onValue`
 - `firebase-admin` (server SDK) — data mutations via API routes
 
 ### Initialization
+
 Both SDKs are lazily initialized to avoid errors during static builds (CI has no env vars):
 
 ```typescript
@@ -87,30 +89,35 @@ function initAdminApp() {
 Firestore/RTDB instances are accessed via function calls (`getClientDatabase()`, `getAdminDatabase()`), never module-level constants.
 
 ### Database Schema Pattern
+
 Separate public and private data at the path level:
+
 ```
 /{collection}/{id}/public    # World-readable data (client SDK subscribes here)
 /{collection}/{id}/private   # Server-only data (Admin SDK only)
 ```
 
 ### Serialization Layer
+
 - TypeScript types define the domain model
 - `{domain}ToFirebase()` converts domain objects to Firebase-safe format (no `undefined` values)
 - `firebaseTo{Domain}()` converts Firebase snapshots back to domain objects with defaults
 - Boolean settings are always written explicitly (not sparse) and deserialized with `?? false`
 
 ### Real-Time Updates
+
 - Clients subscribe to Firebase RTDB paths via `onValue` (wrapped in custom hooks)
 - Server pre-computes per-user state and writes it to per-user paths — clients never need to derive state
 - TanStack Query caches Firebase data; mutations invalidate the cache
 
 ### Environment Variables
-| Variable | Side | Description |
-|---|---|---|
-| `FIREBASE_PROJECT_ID` | Server | Firebase project ID |
-| `FIREBASE_CLIENT_EMAIL` | Server | Service account email |
-| `FIREBASE_PRIVATE_KEY` | Server | Service account key (literal `\n`) |
-| `FIREBASE_DATABASE_URL` | Server | RTDB URL |
+
+| Variable                 | Side   | Description                                                  |
+| ------------------------ | ------ | ------------------------------------------------------------ |
+| `FIREBASE_PROJECT_ID`    | Server | Firebase project ID                                          |
+| `FIREBASE_CLIENT_EMAIL`  | Server | Service account email                                        |
+| `FIREBASE_PRIVATE_KEY`   | Server | Service account key (literal `\n`)                           |
+| `FIREBASE_DATABASE_URL`  | Server | RTDB URL                                                     |
 | `NEXT_PUBLIC_FIREBASE_*` | Client | Client SDK config (API key, auth domain, project ID, DB URL) |
 
 `NEXT_PUBLIC_` variables are bundled into client JavaScript — this is by design. Access control is enforced by Firebase security rules (RTDB rules or Firestore rules), not by hiding these keys.
@@ -143,6 +150,7 @@ Three test projects in `vitest.config.mts`:
 The file extension convention (`.test.ts` vs `.test.tsx`) determines which project runs each test. This keeps the split automatic — no manual tagging or directory-based routing needed.
 
 ### Test File Conventions
+
 - Co-located with source: `Component.test.tsx`, `utility.test.ts`
 - Component tests use `@testing-library/react` with `afterEach(cleanup)`
 - No jest-dom matchers — use `.toBeDefined()` or `.textContent`
@@ -152,17 +160,20 @@ The file extension convention (`.test.ts` vs `.test.tsx`) determines which proje
 ## Storybook Configuration
 
 ### Setup
+
 - Framework: `@storybook/nextjs-vite`
 - Addons: `addon-a11y`, `addon-docs`, `eslint-plugin-storybook`
 - Tailwind loaded via `globals.css` import in `.storybook/preview.ts`
 
 ### Conventions
+
 - Stories co-located as `ComponentName.stories.tsx`
 - Presentational split for hook-dependent components: `{Component}View` accepts callbacks
 - Mock data fixtures — no Firebase, no providers
 - ESLint: strict TS rules relaxed for `.stories.tsx`; `.storybook/` and `storybook-static/` ignored
 
 ### Future Evaluation
+
 - Chromatic for visual regression testing
 - `@storybook/addon-vitest` for story-based integration testing
 - `@storybook/addon-onboarding` — interactive first-launch walkthrough. Low value for solo/small-team projects where conventions are documented in AGENTS.md. May be useful for projects with frequent new contributors who need to learn the story writing workflow.
@@ -170,6 +181,7 @@ The file extension convention (`.test.ts` vs `.test.tsx`) determines which proje
 ## ESLint Configuration
 
 Flat config (`eslint.config.js`) with:
+
 - `typescript-eslint` strict + stylistic type-checked rules for `src/**/*.{ts,tsx}`
 - `react-hooks` plugin (rules-of-hooks + exhaustive-deps as errors)
 - `eslint-plugin-storybook` flat/recommended
@@ -181,6 +193,7 @@ Flat config (`eslint.config.js`) with:
 ### GitHub Actions
 
 **Composite setup action** (`.github/actions/setup/action.yml`):
+
 ```yaml
 - pnpm/action-setup (install pnpm)
 - actions/setup-node (with cache: "pnpm")
@@ -202,6 +215,7 @@ Flat config (`eslint.config.js`) with:
 **Claude Code** (`issue_comment`, `pull_request_review_comment`, `issues`): Optional — runs Claude Code action when `@claude` is mentioned in issues/PRs. Requires `ANTHROPIC_API_KEY` secret.
 
 ### Vercel
+
 - Automatic preview deployments on every PR
 - Production deployment on merge to main
 - Root directory: project root (no subdirectory)
@@ -209,6 +223,7 @@ Flat config (`eslint.config.js`) with:
 ## Service Layer Pattern
 
 ### Separation of Concerns
+
 ```
 API Route → Service (data access) → Firebase
 ```
@@ -217,6 +232,7 @@ API Route → Service (data access) → Firebase
 - **Business logic modules**: Domain-specific logic separated from data access.
 
 ### Service Conventions
+
 - Service functions accept and return typed interfaces, never raw Firebase snapshots
 - Timestamps converted to `Date` objects at the service boundary
 - Each domain gets its own service file or directory
@@ -225,26 +241,33 @@ API Route → Service (data access) → Firebase
 ## State Management
 
 ### Server State (TanStack Query)
+
 - Data fetched via `useQuery` with Firebase `onValue` for real-time push
 - Mutations via `useMutation` → API routes → Firebase Admin SDK
 - Cache invalidation on successful mutation
 
 ### Client State (Redux Toolkit)
+
 - Used for local UI state only (forms, config panels)
 - Slices in `store/{feature}-slice.ts`
 - Connected to components via `useAppSelector` / `useAppDispatch`
 
 ### Providers Pattern
+
 A client boundary component wraps the app with all required providers:
+
 ```
 Root Layout → Providers ("use client") → QueryClientProvider → AuthProvider → Pages
 ```
+
 `QueryClient` is created via `useState` inside the Providers component to avoid re-creation on re-renders.
 
 ### Real-Time Pattern
+
 ```
 Firebase RTDB push → onValue callback → TanStack Query cache update → React re-render
 ```
+
 No polling needed for subscribed paths. Mutations go through API routes, which write to Firebase, which triggers the push.
 
 ## Authentication Pattern
@@ -257,31 +280,33 @@ No polling needed for subscribed paths. Mutations go through API routes, which w
 ## Key Packages
 
 ### Dependencies
-| Package | Purpose |
-|---|---|
-| `next` | Fullstack React framework |
-| `react` / `react-dom` | UI rendering |
-| `@reduxjs/toolkit` / `react-redux` | Client state management |
-| `@tanstack/react-query` | Server state management |
-| `firebase` | Client SDK (real-time subscriptions) |
-| `firebase-admin` | Server SDK (data mutations) |
-| `@sentry/nextjs` | Error tracking |
-| `@vercel/analytics` | Usage analytics |
-| `class-variance-authority` / `clsx` / `tailwind-merge` | ShadCN UI utilities |
-| `lucide-react` | Icons |
+
+| Package                                                | Purpose                              |
+| ------------------------------------------------------ | ------------------------------------ |
+| `next`                                                 | Fullstack React framework            |
+| `react` / `react-dom`                                  | UI rendering                         |
+| `@reduxjs/toolkit` / `react-redux`                     | Client state management              |
+| `@tanstack/react-query`                                | Server state management              |
+| `firebase`                                             | Client SDK (real-time subscriptions) |
+| `firebase-admin`                                       | Server SDK (data mutations)          |
+| `@sentry/nextjs`                                       | Error tracking                       |
+| `@vercel/analytics`                                    | Usage analytics                      |
+| `class-variance-authority` / `clsx` / `tailwind-merge` | ShadCN UI utilities                  |
+| `lucide-react`                                         | Icons                                |
 
 ### Dev Dependencies
-| Package | Purpose |
-|---|---|
-| `typescript` | Type checking |
-| `vitest` / `@testing-library/react` / `happy-dom` | Testing |
-| `storybook` / `@storybook/nextjs-vite` | Component development |
-| `eslint` / `typescript-eslint` / `eslint-plugin-react-hooks` / `eslint-plugin-storybook` | Linting |
-| `prettier` | Formatting |
-| `prettier-plugin-tailwindcss` | Automatic Tailwind class sorting (recommended) |
-| `husky` / `lint-staged` | Pre-commit hooks |
-| `tailwindcss` / `@tailwindcss/postcss` / `postcss` | Styling |
-| `shadcn` | ShadCN UI CLI |
+
+| Package                                                                                  | Purpose                                        |
+| ---------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `typescript`                                                                             | Type checking                                  |
+| `vitest` / `@testing-library/react` / `happy-dom`                                        | Testing                                        |
+| `storybook` / `@storybook/nextjs-vite`                                                   | Component development                          |
+| `eslint` / `typescript-eslint` / `eslint-plugin-react-hooks` / `eslint-plugin-storybook` | Linting                                        |
+| `prettier`                                                                               | Formatting                                     |
+| `prettier-plugin-tailwindcss`                                                            | Automatic Tailwind class sorting (recommended) |
+| `husky` / `lint-staged`                                                                  | Pre-commit hooks                               |
+| `tailwindcss` / `@tailwindcss/postcss` / `postcss`                                       | Styling                                        |
+| `shadcn`                                                                                 | ShadCN UI CLI                                  |
 
 ## Initialization Checklist
 

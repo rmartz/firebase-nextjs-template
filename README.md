@@ -4,21 +4,21 @@ A template repository for building Next.js applications with Firebase, deployed 
 
 ## Stack
 
-| Layer | Technology | Purpose |
-|---|---|---|
-| Framework | [Next.js](https://nextjs.org/) (App Router) | Fullstack React with SSR/API routes |
-| Language | TypeScript (strict mode) | Type safety throughout |
-| Package Manager | [pnpm](https://pnpm.io/) | Fast, disk-efficient dependency management |
-| UI Components | [ShadCN UI](https://ui.shadcn.com/) + [Tailwind CSS](https://tailwindcss.com/) | Composable, accessible component primitives |
-| State (server) | [TanStack Query](https://tanstack.com/query) | Server state caching, polling, invalidation |
-| State (client) | [Redux Toolkit](https://redux-toolkit.js.org/) | Local UI state |
-| Database | [Firebase Realtime Database](https://firebase.google.com/docs/database) | Persistent storage with real-time push |
-| Auth | Firebase Admin SDK (server) | Session-based auth via API routes |
-| Hosting | [Vercel](https://vercel.com/) | Deployment, preview URLs, edge functions |
-| Testing | [Vitest](https://vitest.dev/) + [@testing-library/react](https://testing-library.com/docs/react-testing-library/intro/) | Unit, component, and integration tests |
-| Visual Testing | [Storybook](https://storybook.js.org/) | Component development and visual documentation |
-| CI/CD | GitHub Actions | Lint, format, test, build on every PR |
-| Monitoring | [Sentry](https://sentry.io/) | Error tracking (client + server + edge) |
+| Layer           | Technology                                                                                                              | Purpose                                        |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| Framework       | [Next.js](https://nextjs.org/) (App Router)                                                                             | Fullstack React with SSR/API routes            |
+| Language        | TypeScript (strict mode)                                                                                                | Type safety throughout                         |
+| Package Manager | [pnpm](https://pnpm.io/)                                                                                                | Fast, disk-efficient dependency management     |
+| UI Components   | [ShadCN UI](https://ui.shadcn.com/) + [Tailwind CSS](https://tailwindcss.com/)                                          | Composable, accessible component primitives    |
+| State (server)  | [TanStack Query](https://tanstack.com/query)                                                                            | Server state caching, polling, invalidation    |
+| State (client)  | [Redux Toolkit](https://redux-toolkit.js.org/)                                                                          | Local UI state                                 |
+| Database        | [Firebase Realtime Database](https://firebase.google.com/docs/database)                                                 | Persistent storage with real-time push         |
+| Auth            | Firebase Admin SDK (server)                                                                                             | Session-based auth via API routes              |
+| Hosting         | [Vercel](https://vercel.com/)                                                                                           | Deployment, preview URLs, edge functions       |
+| Testing         | [Vitest](https://vitest.dev/) + [@testing-library/react](https://testing-library.com/docs/react-testing-library/intro/) | Unit, component, and integration tests         |
+| Visual Testing  | [Storybook](https://storybook.js.org/)                                                                                  | Component development and visual documentation |
+| CI/CD           | GitHub Actions                                                                                                          | Lint, format, test, build on every PR          |
+| Monitoring      | [Sentry](https://sentry.io/)                                                                                            | Error tracking (client + server + edge)        |
 
 ## Getting Started
 
@@ -112,6 +112,7 @@ project-root/
 CI runs automatically on every PR with four parallel checks: tests, lint, format, and build. See [`.github/workflows/ci-actions.yml`](.github/workflows/ci-actions.yml).
 
 Additional workflows:
+
 - **Auto-format** — Automatically fixes formatting on Claude-authored PRs
 - **Dependabot lockfile** — Regenerates `pnpm-lock.yaml` for Dependabot PRs
 - **Claude Code** — Enables `@claude` mentions in issues and PRs (requires `ANTHROPIC_API_KEY` secret)

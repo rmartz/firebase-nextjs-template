@@ -18,17 +18,20 @@ pnpm dev
 ## Development Workflow
 
 1. Create a branch from `main` using the naming convention:
+
    ```
    feature/description-123
    chore/description-123
    refactor/description-123
    docs/description-123
    ```
+
    Where `123` is the issue number.
 
 2. Make your changes following the conventions in [AGENTS.md](AGENTS.md).
 
 3. Run checks locally before pushing:
+
    ```bash
    pnpm lint
    pnpm format:check
@@ -67,12 +70,12 @@ No `feat:`/`fix:` conventional commit prefixes.
 
 Every PR runs four parallel checks via GitHub Actions:
 
-| Check | Command | Must Pass |
-|---|---|---|
-| Tests | `pnpm test` | Yes |
-| Lint | `pnpm lint` | Yes (zero warnings) |
-| Format | `pnpm format:check` | Yes |
-| Build | `pnpm build` | Yes |
+| Check  | Command             | Must Pass           |
+| ------ | ------------------- | ------------------- |
+| Tests  | `pnpm test`         | Yes                 |
+| Lint   | `pnpm lint`         | Yes (zero warnings) |
+| Format | `pnpm format:check` | Yes                 |
+| Build  | `pnpm build`        | Yes                 |
 
 ## Storybook
 
@@ -83,6 +86,7 @@ When adding or modifying UI components:
 3. For hook-dependent components, use the presentational split pattern: extract a `ComponentNameView` that accepts callbacks
 
 Run Storybook locally:
+
 ```bash
 pnpm storybook
 ```
@@ -96,6 +100,7 @@ pnpm storybook
 - Assert against copy constants, not hardcoded strings
 
 Run tests:
+
 ```bash
 pnpm test
 ```
