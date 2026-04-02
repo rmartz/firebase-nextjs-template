@@ -7,8 +7,6 @@ afterEach(cleanup);
 describe("Home", () => {
   it("renders the heading", () => {
     render(<Home />);
-    expect(
-      screen.getByText("Firebase + Next.js Template"),
-    ).toBeDefined();
+    expect(screen.getByText("Firebase + Next.js Template")).toBeDefined();
   });
 });
