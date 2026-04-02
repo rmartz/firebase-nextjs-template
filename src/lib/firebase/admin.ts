@@ -1,7 +1,6 @@
 import { initializeApp, getApps, cert, type App } from "firebase-admin/app";
-import { getDatabase, type Database } from "firebase-admin/database";
 
-function initAdminApp(): App {
+export function getAdminApp(): App {
   const existing = getApps().find((a) => a.name === "[DEFAULT]");
   if (existing) return existing;
 
@@ -13,8 +12,4 @@ function initAdminApp(): App {
     }),
     databaseURL: process.env["FIREBASE_DATABASE_URL"],
   });
-}
-
-export function getAdminDatabase(): Database {
-  return getDatabase(initAdminApp());
 }
