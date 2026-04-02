@@ -9,3 +9,4 @@ tsconfig.tsbuildinfo
 .env*.local
 .env.sentry-build-plugin
 storybook-static
+next-env.d.ts
