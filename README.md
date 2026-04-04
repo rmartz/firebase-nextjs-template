@@ -113,8 +113,6 @@ CI runs automatically on every PR with four parallel checks: tests, lint, format
 
 Additional workflows:
 
-- **Auto-format** — Automatically fixes formatting on Claude-authored PRs
-- **Dependabot lockfile** — Regenerates `pnpm-lock.yaml` for Dependabot PRs
 - **Claude Code** — Enables `@claude` mentions in issues and PRs (requires `ANTHROPIC_API_KEY` secret)
 
 ## License
