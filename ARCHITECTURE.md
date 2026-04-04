@@ -210,10 +210,6 @@ Flat config (`eslint.config.js`) with:
 | Format | `pnpm format:check` | Prettier check |
 | Build | `pnpm build` | Next.js production build |
 
-**Auto-format** (`workflow_run`): On CI format failure, auto-fix and push (Claude-authored PRs only).
-
-**Dependabot lockfile regen** (`pull_request_target`): Regenerates `pnpm-lock.yaml` for Dependabot PRs using `CI_PAT_TOKEN` for proper check triggering.
-
 **Claude Code** (`issue_comment`, `pull_request_review_comment`, `issues`): Optional — runs Claude Code action when `@claude` is mentioned in issues/PRs. Requires `ANTHROPIC_API_KEY` secret.
 
 ### Vercel
@@ -319,5 +315,5 @@ When starting a new project from this template:
 3. Copy `.env.example` to `.env.local` and fill in Firebase credentials
 4. Configure Firebase project + environment variables
 5. Set up Vercel project with GitHub integration
-6. Add `ANTHROPIC_API_KEY` and `CI_PAT_TOKEN` secrets to GitHub repository settings
+6. Add `ANTHROPIC_API_KEY` secret to GitHub repository settings (for Claude Code workflow)
 7. Update `AGENTS.md` / `CLAUDE.md` with project-specific conventions
