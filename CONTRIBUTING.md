@@ -56,7 +56,7 @@ See [AGENTS.md](AGENTS.md) for the full list of code conventions, including:
 
 - TypeScript strict mode, no `any` types
 - Named exports (except Next.js pages and Redux slices)
-- Co-located test files (`Component.test.tsx`) and stories (`Component.stories.tsx`)
+- Co-located test files (`Component.spec.tsx`) and stories (`Component.stories.tsx`)
 - User-facing strings in co-located copy files for i18n readiness
 - File size limits (~200 lines for source, ~300 lines for tests)
 
