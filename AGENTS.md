@@ -27,11 +27,9 @@ pnpm build-storybook  # Build static Storybook
 ## File Organization
 
 - **Source files**: Keep under ~200 lines (split at ~240). Large files should be split by logical concern.
-- **Test files**: Keep under ~300 lines (split at ~360). When splitting, organize into a `{module}-tests/` directory with domain-specific files.
-- **Components**: Each component file must contain exactly one component and its associated props interface. Delegate complex logic to utility functions or sub-components.
+- **Test files**: Keep under ~300 lines (split at ~360). Use `.spec.ts` / `.spec.tsx` extension (not `.test.ts`). When splitting, organize into a `{module}-tests/` directory with domain-specific files.
+- **Components**: A component file contains its primary component and props interface. A sub-component may be co-located in the same file if it owns no hooks, state, effects, or context, and is used only by the parent component in that file — e.g., a context wrapper, structural template, or props alias. A sub-component must be in its own file when any of these are true: it owns hooks, state, effects, or context; it is referenced from multiple parents; or it is substantial enough to warrant its own stories or tests (e.g., list items, row components, panels, form sections). All component props must be defined as an explicitly named interface (e.g., `interface UserListProps`), never inline in the function signature.
 - **Type files**: Convert large type files into barrel-exported directories with one file per logical domain.
-- **Utility files**: Split by the type of operation or domain they serve.
-- **Service files**: Extract complex logic areas into focused utility functions or smaller services.
 - Add a barrel `index.ts` when a component or module directory exposes a public API or already
   follows a barrel pattern; do not require one for every directory (e.g. ShadCN-generated
   `src/components/ui/` has no barrel by convention).
@@ -40,8 +38,13 @@ pnpm build-storybook  # Build static Storybook
 
 ## Code Conventions
 
+- **Favor type inference.** Explicit generic type arguments (for example, `someFn<Foo>(...)`) are a code smell when TypeScript can infer them.
 - **No spurious variables.** Do not assign a value to a variable only to immediately return it on the next line — return the expression directly instead.
+- **No IIFEs.** Do not use immediately-invoked function expressions. Extract the logic into a named helper function or compute the value with a plain expression instead.
+- **No function-style imports.** Do not use inline `import("…").Type` syntax in type annotations. Use module-level `import type { … } from "…"` statements at the top of the file. Dynamic `await import("…")` for services that require conditional loading (e.g., Sentry instrumentation) is acceptable.
+- **No unnecessary helpers.** Do not extract logic into a helper function unless it separates significant logic or belongs in a different module. Three similar lines is better than a premature abstraction.
 - **Enums and constant objects** should be kept in alphabetical order to minimize merge conflicts.
+- **Prefer enums over string literal unions** for any domain concept with two or more named states (e.g., use `enum Status { Active = "active", Inactive = "inactive" }` rather than `"active" | "inactive"`). String enum values must match the current serialized schema. Export new enums from the module barrel.
 
 ## Naming Conventions
 
@@ -57,7 +60,11 @@ pnpm build-storybook  # Build static Storybook
 
   Existing hardcoded strings elsewhere in the codebase are technical debt to be migrated over
   time; this rule does not require unrelated cleanup.
-- Copy files export a single `as const` object named `{SCOPE}_COPY`.
+- Copy files export a single `as const` object named `{SCOPE}_COPY` (e.g., `HOME_PAGE_COPY`, `USER_PROFILE_COPY`).
+
+## Documentation
+
+- Keep documentation in sync with the code — outdated docs are worse than no docs.
 
 ## React / Next.js Standards
 
@@ -74,8 +81,7 @@ pnpm build-storybook  # Build static Storybook
 
 ### JSX
 
-- **No imperative logic inside JSX.** All conditional logic and variable declarations must be computed in the component body before the `return` statement, or extracted into a dedicated child component. Simple functional expressions are fine in JSX — inline arrow functions, ternaries, and `.map()` calls that return JSX directly are all permitted. What is prohibited is multi-statement blocks: declaring intermediate variables and then returning a value inside JSX. Statement blocks inside callback functions passed as JSX props are allowed (e.g. multi-statement event handlers like `onChange={(e) => { setValue(e.target.value); setError(undefined); }}`).
-- JSX should only contain simple functional expressions: `items.map(item => <Item key={item.id} {...item} />)`.
+- **No imperative logic inside JSX.** Imperative logic means anything that requires a statement rather than an expression: `const`/`let` declarations, `if`/`switch` blocks, loops, or any sequence of statements that produces a result through side effects. All such logic must live in the component body before the `return` statement, or be extracted into a child component. Expressions of any complexity are permitted directly in JSX — ternaries, logical operators (`&&`, `||`, `??`), method chains (`.map()`, `.filter()`, `.find()`), nested function calls, and template literals are all fine as long as they form a single expression with no intermediate bindings. Statement blocks inside callback functions passed as JSX props are allowed (e.g. multi-statement event handlers like `onChange={(e) => { setValue(e.target.value); setError(undefined); }}`).
 
 ### Component Structure
 
@@ -90,24 +96,33 @@ pnpm build-storybook  # Build static Storybook
 
 ## Component Tests
 
-- Test files are co-located with their component: `ComponentName.test.tsx`.
+- Test files are co-located with their component: `ComponentName.spec.tsx`.
 - When adding or modifying a UI component, add or update its test to verify rendering behavior and key prop-driven states.
 - Use `@testing-library/react` with `vitest`. Always call `afterEach(cleanup)`.
 - Do not use `.toBeInTheDocument()` — use `.toBeDefined()` or check `.textContent` instead.
-- Assert against copy constants rather than hardcoded strings.
+- Assert against copy constants (e.g., `HOME_PAGE_COPY`) rather than hardcoded strings.
 - Test presentational view components directly; avoid mocking hooks in tests where possible.
 
 ## Testing Conventions
 
 - Use `describe`/`it` from Vitest (not `test`).
-- Test fixture generators use `make{DomainName}()` pattern.
+- Test fixture generators use `make{DomainName}()` (e.g., `makeUser()`, `makeSession()`).
 - When splitting large test files, organize into `{module}-tests/` directories.
+
+### Test Design
+
+- **Control inputs and outputs.** Do not rely on a function's default return values as the assertion of a test unless the purpose of the test is specifically to verify those defaults. Use explicit, non-default values so a passing test proves the value was produced by logic, not inherited from an initializer.
+- **One reason to fail per test.** Each test should assert a single logical outcome. Helper functions are fine, but if a test invokes two functions from the codebase it should be explicitly testing how those two interact. Incidental coverage of a second function is not a reason to combine assertions.
+- **Keep tests simple.** A failing test should make it immediately obvious whether the failure is a bug or an intentional change in behavior. If understanding a failure requires reading more than one layer of test setup or multiple assertions, split the test.
+- **Granularity scales with level of abstraction.** Low-level functions (pure utilities, serializers) warrant thorough edge-case coverage. High-level functions (service orchestration) should have smoke tests that verify they correctly apply the lower-level logic — not re-test every edge case that belongs in the lower-level tests.
+
+## GitHub Issues
+
+- When picking the next task from a milestone, use `gh issue list --milestone "<milestone title>" --state open`.
 
 ## Git Conventions
 
 - Branch names: lowercase with hyphens, prefixed by type: `feature/`, `chore/`, `refactor/`, `docs/`, with issue number suffix (e.g., `feature/user-profile-42`).
 - Commit messages: imperative verbs (Add, Implement, Fix, Update, Extract, Remove). No `feat:`/`fix:` prefixes.
-
-## Documentation
-
-- Keep documentation in sync with the code — outdated docs are worse than no docs.
+- PR titles must follow Conventional Commits format: `<type>: description` or `<type>(<scope>): description`. Valid types: `feat`, `fix`, `docs`, `chore`, `refactor`, `test`, `style`, `perf`, `ci`, `build`, `revert`. A `!` suffix is allowed before the colon to denote breaking changes (e.g., `feat!: remove legacy auth`). This is enforced by CI.
+- PR descriptions must use `Closes #123`, `Fixes #123`, or `Resolves #123` to trigger GitHub's automatic issue close on merge. Phrases like "Addresses #123" or "Related to #123" do NOT trigger auto-close.
