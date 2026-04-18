@@ -32,8 +32,11 @@ pnpm build-storybook  # Build static Storybook
 - **Type files**: Convert large type files into barrel-exported directories with one file per logical domain.
 - **Utility files**: Split by the type of operation or domain they serve.
 - **Service files**: Extract complex logic areas into focused utility functions or smaller services.
-- Barrel `index.ts` exports for all component/module directories.
-- Use named exports, not default exports (except for Next.js pages and Redux slices).
+- Add a barrel `index.ts` when a component or module directory exposes a public API or already
+  follows a barrel pattern; do not require one for every directory (e.g. ShadCN-generated
+  `src/components/ui/` has no barrel by convention).
+- Use named exports, not default exports (except for Next.js pages, Redux slices, and Storybook
+  story files, which require `export default meta`).
 
 ## Code Conventions
 
@@ -48,8 +51,12 @@ pnpm build-storybook  # Build static Storybook
 
 ## User-Facing Text
 
-- All user-facing strings must be stored in a co-located copy file (e.g., `ComponentName.copy.ts` or `copy.ts`) for internationalization (i18n) readiness.
-- Do not hardcode display strings inline in components.
+- For any new or modified UI component, store user-facing strings in a co-located copy file
+  (e.g., `ComponentName.copy.ts` or `copy.ts`) for internationalization (i18n) readiness.
+  Do not introduce new hardcoded display strings inline in components you are actively changing.
+
+  Existing hardcoded strings elsewhere in the codebase are technical debt to be migrated over
+  time; this rule does not require unrelated cleanup.
 - Copy files export a single `as const` object named `{SCOPE}_COPY`.
 
 ## React / Next.js Standards
@@ -67,7 +74,7 @@ pnpm build-storybook  # Build static Storybook
 
 ### JSX
 
-- **No imperative logic inside JSX.** All conditional logic and variable declarations must be computed in the component body before the `return` statement, or extracted into a dedicated child component. Simple functional expressions are fine in JSX — inline arrow functions, ternaries, and `.map()` calls that return JSX directly are all permitted. What is prohibited is multi-statement blocks: declaring intermediate variables and then returning a value inside JSX.
+- **No imperative logic inside JSX.** All conditional logic and variable declarations must be computed in the component body before the `return` statement, or extracted into a dedicated child component. Simple functional expressions are fine in JSX — inline arrow functions, ternaries, and `.map()` calls that return JSX directly are all permitted. What is prohibited is multi-statement blocks: declaring intermediate variables and then returning a value inside JSX. Statement blocks inside callback functions passed as JSX props are allowed (e.g. multi-statement event handlers like `onChange={(e) => { setValue(e.target.value); setError(undefined); }}`).
 - JSX should only contain simple functional expressions: `items.map(item => <Item key={item.id} {...item} />)`.
 
 ### Component Structure
