@@ -134,26 +134,26 @@ Three test projects in `vitest.config.mts`:
     projects: [
       {
         // Unit tests (actions, services, utilities)
-        test: { name: "node", environment: "node", include: ["src/**/*.test.ts"] },
+        test: { name: "node", environment: "node", include: ["src/**/*.spec.ts"] },
       },
       {
         // Hook tests (require React context)
-        test: { name: "hooks", environment: "happy-dom", include: ["src/hooks/**/*.test.ts"] },
+        test: { name: "hooks", environment: "happy-dom", include: ["src/hooks/**/*.spec.ts"] },
       },
       {
         // Component tests (require DOM)
-        test: { name: "components", environment: "happy-dom", include: ["src/**/*.test.tsx"] },
+        test: { name: "components", environment: "happy-dom", include: ["src/**/*.spec.tsx"] },
       },
     ],
   },
 }
 ```
 
-The file extension convention (`.test.ts` vs `.test.tsx`) determines which project runs each test. This keeps the split automatic — no manual tagging or directory-based routing needed.
+The file extension convention (`.spec.ts` vs `.spec.tsx`) determines which project runs each test. This keeps the split automatic — no manual tagging or directory-based routing needed.
 
 ### Test File Conventions
 
-- Co-located with source: `Component.test.tsx`, `utility.test.ts`
+- Co-located with source: `Component.spec.tsx`, `utility.spec.ts`
 - Component tests use `@testing-library/react` with `afterEach(cleanup)`
 - No jest-dom matchers — use `.toBeDefined()` or `.textContent`
 - Test fixtures use `make{Domain}()` factory functions
