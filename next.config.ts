@@ -7,7 +7,7 @@ export default withSentryConfig(nextConfig, {
   org: process.env["SENTRY_ORG"],
   project: process.env["SENTRY_PROJECT"],
 
-  // Source map upload auth token
+  // Source map upload auth token — store in .env.sentry-build-plugin, not .env
   authToken: process.env["SENTRY_AUTH_TOKEN"],
 
   // Upload wider set of client source files for better stack trace resolution
