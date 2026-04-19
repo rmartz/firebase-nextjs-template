@@ -1,4 +1,5 @@
 import { initializeApp, getApps, cert, type App } from "firebase-admin/app";
+import { getAuth, type Auth } from "firebase-admin/auth";
 
 export function getAdminApp(): App {
   const existing = getApps().find((a) => a.name === "[DEFAULT]");
@@ -13,4 +14,8 @@ export function getAdminApp(): App {
     // Only needed for Realtime Database — remove if using Firestore only
     databaseURL: process.env["FIREBASE_DATABASE_URL"],
   });
+}
+
+export function getAdminAuth(): Auth {
+  return getAuth(getAdminApp());
 }

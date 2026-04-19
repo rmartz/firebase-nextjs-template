@@ -1,4 +1,5 @@
 import { initializeApp, getApps, type FirebaseApp } from "firebase/app";
+import { getAuth, type Auth } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: process.env["NEXT_PUBLIC_FIREBASE_API_KEY"],
@@ -13,4 +14,8 @@ export function getClientApp(): FirebaseApp {
     getApps().find((a) => a.name === "[DEFAULT]") ??
     initializeApp(firebaseConfig)
   );
+}
+
+export function getClientAuth(): Auth {
+  return getAuth(getClientApp());
 }
