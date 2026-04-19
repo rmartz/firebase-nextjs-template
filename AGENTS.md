@@ -60,6 +60,7 @@ pnpm build-storybook  # Build static Storybook
 
   Existing hardcoded strings elsewhere in the codebase are technical debt to be migrated over
   time; this rule does not require unrelated cleanup.
+
 - Copy files export a single `as const` object named `{SCOPE}_COPY` (e.g., `HOME_PAGE_COPY`, `USER_PROFILE_COPY`).
 
 ## Documentation
