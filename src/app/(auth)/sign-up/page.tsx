@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { FirebaseError } from "firebase/app";
-import { signUp } from "@/services/auth";
+import { createSession, signUp } from "@/services/auth";
 import { SIGN_UP_COPY } from "./copy";
 
 export default function SignUpPage() {
@@ -20,12 +20,7 @@ export default function SignUpPage() {
     setLoading(true);
     try {
       const credential = await signUp(email, password);
-      const idToken = await credential.user.getIdToken();
-      await fetch("/api/auth/session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken }),
-      });
+      await createSession(await credential.user.getIdToken());
       router.push("/");
     } catch (err) {
       const code = (err as FirebaseError).code;

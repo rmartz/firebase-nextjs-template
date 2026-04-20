@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { FirebaseError } from "firebase/app";
-import { signIn } from "@/services/auth";
+import { createSession, signIn } from "@/services/auth";
 import { SIGN_IN_COPY } from "./copy";
 
 export default function SignInForm() {
@@ -21,14 +21,11 @@ export default function SignInForm() {
     setLoading(true);
     try {
       const credential = await signIn(email, password);
-      const idToken = await credential.user.getIdToken();
-      await fetch("/api/auth/session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken }),
-      });
-      const next = searchParams.get("next") ?? "/";
-      router.push(next);
+      await createSession(await credential.user.getIdToken());
+      const next = searchParams.get("next");
+      const redirectTo =
+        next?.startsWith("/") && !next.startsWith("//") ? next : "/";
+      router.push(redirectTo);
     } catch (err) {
       const code = (err as FirebaseError).code;
       const messages = SIGN_IN_COPY.errors;

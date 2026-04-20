@@ -288,15 +288,23 @@ The middleware runs in the Node.js runtime (not Edge) because `firebase-admin` d
 
 ### Adding SSO providers (Google, Apple, etc.)
 
-Adding a provider requires only client-side changes — no server modifications needed:
+Adding a provider requires only client-side changes — no server modifications needed. Add a function to `src/services/auth.ts` and call it from the component:
 
 ```typescript
+// src/services/auth.ts
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { getClientAuth } from "@/lib/firebase/client";
 
-const credential = await signInWithPopup(getClientAuth(), new GoogleAuthProvider());
-const idToken = await credential.user.getIdToken();
-await fetch("/api/auth/session", { method: "POST", ... });
+export async function signInWithGoogle() {
+  const credential = await signInWithPopup(
+    getClientAuth(),
+    new GoogleAuthProvider(),
+  );
+  await createSession(await credential.user.getIdToken());
+}
+
+// In your component:
+import { signInWithGoogle } from "@/services/auth";
+await signInWithGoogle();
 ```
 
 ### Scoping data to the authenticated user
