@@ -270,10 +270,46 @@ No polling needed for subscribed paths. Mutations go through API routes, which w
 
 ## Authentication Pattern
 
-- Session-based: random session ID generated at creation/join, stored in `localStorage`
-- Sent as `x-session-id` header on all API requests
-- Server validates session ID against Firebase private data
-- No Firebase Auth SDK — custom lightweight session management
+The template uses Firebase Auth with server-side session cookies for SSR compatibility.
+
+### AuthProvider → useAuth() contract
+
+`AuthProvider` (`src/components/auth/AuthProvider.tsx`) subscribes to `onAuthStateChanged` and exposes `{ user: User | null, loading: boolean }` via React context. Components and hooks access this via `useAuth()` from `src/hooks/use-auth.ts` — never import Firebase Auth directly in components.
+
+### Session cookie flow
+
+1. User signs in via `signIn()` / `signUp()` from `src/services/auth.ts`
+2. Client calls `user.getIdToken()` and POSTs it to `POST /api/auth/session`
+3. The server calls `getAdminAuth().createSessionCookie()` and sets an `HttpOnly`, `Secure`, `SameSite=Strict` cookie
+4. Middleware (`src/middleware.ts`) verifies the cookie on every request via `getAdminAuth().verifySessionCookie(cookie, true)` and redirects unauthenticated requests to `/sign-in?next=<path>`
+5. On sign-out, call `DELETE /api/auth/session` to clear the cookie, then call `signOut()` from the auth service
+
+The middleware runs in the Node.js runtime (not Edge) because `firebase-admin` does not support the Edge runtime.
+
+### Adding SSO providers (Google, Apple, etc.)
+
+Adding a provider requires only client-side changes — no server modifications needed. Add a function to `src/services/auth.ts` and call it from the component:
+
+```typescript
+// src/services/auth.ts
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+
+export async function signInWithGoogle() {
+  const credential = await signInWithPopup(
+    getClientAuth(),
+    new GoogleAuthProvider(),
+  );
+  await createSession(await credential.user.getIdToken());
+}
+
+// In your component:
+import { signInWithGoogle } from "@/services/auth";
+await signInWithGoogle();
+```
+
+### Scoping data to the authenticated user
+
+The verified session cookie decoded by `verifySessionCookie()` contains `uid`. Use this to scope all database reads and writes to the authenticated user's paths.
 
 ## Key Packages
 
