@@ -55,6 +55,16 @@ export default tseslint.config(
       },
     },
   },
+  // Root-level framework config files (Sentry, Next.js) use SDK types that don't
+  // resolve cleanly under strictTypeChecked — relax unsafe-call/member rules
+  {
+    files: ["sentry.*.config.ts", "instrumentation.ts", "next.config.ts"],
+    rules: {
+      "@typescript-eslint/no-unsafe-call": "off",
+      "@typescript-eslint/no-unsafe-member-access": "off",
+      "@typescript-eslint/no-unsafe-assignment": "off",
+    },
+  },
   // Test files use Response.json() which inherently returns `any`; relax unsafe rules
   {
     files: ["src/**/*.spec.ts", "src/**/*.spec.tsx"],
