@@ -68,8 +68,8 @@ if [[ -n "$FIREBASE_CONFIG_FILE" ]]; then
   echo "Extracting Firebase client config from $FIREBASE_CONFIG_FILE..."
   while IFS="=" read -r key value; do
     KEY_VALUE_PAIRS+=("$key=$value")
-  done < <(node -e "
-    const cfg = JSON.parse(require('fs').readFileSync('$FIREBASE_CONFIG_FILE', 'utf8'));
+  done < <(FIREBASE_CONFIG_PATH="$FIREBASE_CONFIG_FILE" node -e "
+    const cfg = JSON.parse(require('fs').readFileSync(process.env.FIREBASE_CONFIG_PATH, 'utf8'));
     const map = {
       apiKey: 'NEXT_PUBLIC_FIREBASE_API_KEY',
       authDomain: 'NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN',
@@ -99,29 +99,41 @@ for pair in "${KEY_VALUE_PAIRS[@]}"; do
   KEY="${pair%%=*}"
   VALUE="${pair#*=}"
 
-  # Update existing key or append under the variables: block
-  if grep -q "^  $KEY:" "$CONFIG_FILE"; then
-    # Use node for safe in-place replacement (avoids sed portability issues)
-    node -e "
-      const fs = require('fs');
-      const content = fs.readFileSync('$CONFIG_FILE', 'utf8');
-      const updated = content.replace(
-        new RegExp('^  $KEY:.*', 'm'),
-        '  $KEY: \"$VALUE\"'
-      );
-      fs.writeFileSync('$CONFIG_FILE', updated);
-    "
-    echo "  Updated $KEY"
-  else
-    # Append before the closing of the variables block
-    node -e "
-      const fs = require('fs');
-      const content = fs.readFileSync('$CONFIG_FILE', 'utf8');
-      const appended = content.trimEnd() + '\n  $KEY: \"$VALUE\"\n';
-      fs.writeFileSync('$CONFIG_FILE', appended);
-    "
-    echo "  Added $KEY"
-  fi
+  # Update existing key or insert within the variables: block.
+  # KEY and VALUE are passed via process.argv to avoid shell injection.
+  action=$(node - "$CONFIG_FILE" "$KEY" "$VALUE" <<'NODE'
+const fs = require('fs');
+const [, , configFile, key, value] = process.argv;
+const escapeRegex = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const content = fs.readFileSync(configFile, 'utf8');
+const lines = content.split('\n');
+
+const variablesStart = lines.findIndex(l => /^variables:\s*$/.test(l));
+if (variablesStart === -1) {
+  process.stderr.write(`ERROR: No variables: block found in ${configFile}\n`);
+  process.exit(1);
+}
+
+let variablesEnd = lines.length;
+for (let i = variablesStart + 1; i < lines.length; i++) {
+  if (/^\S/.test(lines[i]) && lines[i].trim() !== '') { variablesEnd = i; break; }
+}
+
+const renderedLine = `  ${key}: ${JSON.stringify(value)}`;
+const keyPat = new RegExp(`^  ${escapeRegex(key)}:.*$`);
+let updated = false;
+for (let i = variablesStart + 1; i < variablesEnd; i++) {
+  if (keyPat.test(lines[i])) { lines[i] = renderedLine; updated = true; break; }
+}
+if (!updated) lines.splice(variablesEnd, 0, renderedLine);
+
+let out = lines.join('\n');
+if (content.endsWith('\n') && !out.endsWith('\n')) out += '\n';
+fs.writeFileSync(configFile, out);
+process.stdout.write(updated ? 'Updated' : 'Added');
+NODE
+  )
+  echo "  $action $KEY"
 done
 
 # ── Validate ──────────────────────────────────────────────────────────────────

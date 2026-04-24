@@ -16,7 +16,6 @@ regexes = [
   '''your-project-id''',
   '''your-project''',
   '''firebase-adminsdk-xxx''',
-  '''AIzaSy\.\.\."""''',
   # Example/truncated keys in ARCHITECTURE.md and README
   '''xxx@o\w+\.ingest\.sentry\.io''',
   # The .env.example file itself — it contains only placeholder values

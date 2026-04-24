@@ -139,11 +139,14 @@ rotate_environment() {
 
   # Resolve service account email
   local sa_email
-  sa_email="firebase-adminsdk-$(gcloud iam service-accounts list \
+  sa_email=$(gcloud iam service-accounts list \
     --project="$project_id" \
     --filter="email:firebase-adminsdk" \
-    --format="value(email)" 2>/dev/null | head -1 | cut -d@ -f1 | cut -d- -f3-)"
-  sa_email="firebase-adminsdk-${sa_email}@${project_id}.iam.gserviceaccount.com"
+    --format="value(email)" 2>/dev/null | head -1)
+  if [[ -z "$sa_email" ]]; then
+    echo "ERROR: Could not resolve Firebase service account email for project $project_id"
+    exit 1
+  fi
 
   # Capture the current key IDs before creating new ones
   echo "1. Capturing existing Firebase key IDs..."
@@ -238,20 +241,13 @@ rotate_environment() {
       --quiet 2>/dev/null && echo "   Deleted Firebase key: $old_key_id" || true
   done
 
-  # Sentry: revoke old token — identified by listing tokens and excluding the new one
+  # Sentry: automatic revocation is skipped because listing all account tokens and
+  # excluding the new one would delete tokens belonging to other projects on the
+  # same Sentry user. Revoke the old token manually in the Sentry UI once the
+  # new deployment is confirmed healthy.
   if [[ -n "$new_sentry_token" ]]; then
-    local old_token_ids
-    mapfile -t old_token_ids < <(curl -sf \
-      -H "Authorization: Bearer $SENTRY_TOKEN" \
-      "https://sentry.io/api/0/api-tokens/" | \
-      jq -r --arg new "$new_sentry_token" \
-      '.[] | select(.token != $new) | .id')
-    for token_id in "${old_token_ids[@]}"; do
-      curl -sf -X DELETE \
-        -H "Authorization: Bearer $SENTRY_TOKEN" \
-        "https://sentry.io/api/0/api-tokens/$token_id/" && \
-        echo "   Revoked Sentry token: $token_id" || true
-    done
+    echo "   Sentry token updated. Manually revoke the previous token for this"
+    echo "   project/environment in the Sentry UI: https://sentry.io/settings/account/api/auth-tokens/"
   fi
 
   # Clean up key file

@@ -108,6 +108,11 @@ function validateConfig(envName, schema) {
       continue;
     }
     if (inVars && trimmed && !trimmed.startsWith("#")) {
+      // A non-indented line signals a new top-level section — stop collecting
+      if (!line.startsWith(" ")) {
+        inVars = false;
+        continue;
+      }
       const colonIndex = trimmed.indexOf(":");
       if (colonIndex !== -1) {
         const key = trimmed.slice(0, colonIndex).trim();

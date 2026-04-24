@@ -4,8 +4,8 @@
  *   1. Validates deployment config files against deployment/schema.yml
  *   2. Scans staged files for secrets via gitleaks (if installed)
  *
- * Registered as a bin entry so it can be invoked via `pnpm exec secrets-check`.
- * Designed to be called from .husky/pre-commit alongside lint-staged.
+ * Designed to be invoked via `pnpm run secrets-check`.
+ * Intended to be called from .husky/pre-commit alongside lint-staged.
  */
 
 import { execSync, spawnSync } from "child_process";
