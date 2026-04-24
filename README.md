@@ -62,6 +62,9 @@ pnpm test             # Run tests with Vitest
 pnpm tsc              # Type check
 pnpm storybook        # Start Storybook dev server (port 6006)
 pnpm build-storybook  # Build static Storybook
+pnpm run env:pull     # Pull .env.local from Vercel (replaces manual cp .env.example)
+pnpm run env:validate # Validate deployment config files against schema
+pnpm run secrets-check # Run config validation + gitleaks scan (also runs on every commit)
 ```
 
 ## Project Structure
@@ -85,6 +88,17 @@ project-root/
 │   ├── hooks/                  # Custom React hooks (barrel-exported)
 │   ├── store/                  # Redux Toolkit slices
 │   └── test-setup/             # Vitest setup files
+├── deployment/
+│   ├── schema.yml              # Allowlist schema for public config keys
+│   ├── environments.yml        # Active environment list
+│   ├── staging.yml             # Public env config for staging
+│   └── production.yml          # Public env config for production
+├── scripts/
+│   ├── validate-config.mjs     # Validates deployment YAMLs against schema
+│   ├── secrets-check.mjs       # Pre-commit: config validation + gitleaks
+│   ├── update-config.sh        # Update a deployment YAML and sync to Vercel
+│   ├── rotate-keys.sh          # Zero-downtime Firebase + Sentry + Vercel key rotation
+│   └── generate-local-env.sh   # Pull .env.local via vercel env pull
 ├── .storybook/                 # Storybook configuration
 ├── .github/
 │   ├── actions/setup/          # Composite action: pnpm + Node.js + install
@@ -107,12 +121,36 @@ project-root/
 2. Add all environment variables from `.env.example`
 3. Deploy — Vercel handles preview deployments on PRs and production deployments on merge to `main`
 
+### Environment Configuration
+
+Public, non-secret environment config (Firebase project IDs, Sentry org/project, `NEXT_PUBLIC_*` keys) lives in `deployment/{env}.yml` and is validated against `deployment/schema.yml` on every commit and in CI. Secrets never go in these files.
+
+To update a public config value and sync it to Vercel:
+
+```bash
+scripts/update-config.sh staging NEXT_PUBLIC_FIREBASE_PROJECT_ID my-project-id
+# or from a Firebase console JSON download:
+scripts/update-config.sh staging --firebase-config=~/Downloads/firebase-config.json
+```
+
+### Secret Rotation
+
+To rotate all secrets (Firebase service account, Sentry token, Vercel env) with zero downtime:
+
+```bash
+# Prereqs: gcloud auth login && vercel login && sentry-cli login
+scripts/rotate-keys.sh staging
+```
+
+The script creates the new credential, deploys it, waits for a healthy response, then decommissions the old one. No master rotation keys are stored in Vercel.
+
 ### GitHub Actions
 
 CI runs automatically on every PR with four parallel checks: tests, lint, format, and build. See [`.github/workflows/ci-actions.yml`](.github/workflows/ci-actions.yml).
 
 Additional workflows:
 
+- **Secret Scan** — Runs gitleaks and validates deployment config on every PR and push to `main`
 - **Claude Code** — Enables `@claude` mentions in issues and PRs (requires `ANTHROPIC_API_KEY` secret)
 
 ## License
