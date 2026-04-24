@@ -15,7 +15,10 @@
     "format:check": "prettier --check .",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "prepare": "husky"
+    "prepare": "husky",
+    "env:pull": "scripts/generate-local-env.sh",
+    "env:validate": "node scripts/validate-config.mjs",
+    "secrets-check": "node scripts/secrets-check.mjs"
   },
   "lint-staged": {
     "*.{js,mjs,cjs,ts,tsx,jsx}": [
