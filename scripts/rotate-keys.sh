@@ -14,7 +14,7 @@
 #   Sentry:    sentry-cli login  (or SENTRY_AUTH_TOKEN in shell)
 #   Vercel:    vercel login
 #
-# Requires: gcloud, sentry-cli, vercel, jq
+# Requires: gcloud, sentry-cli, vercel, jq, node
 
 set -euo pipefail
 
@@ -44,7 +44,12 @@ if [[ ! -f "$ENVIRONMENTS_FILE" ]]; then
 fi
 
 SINGLE_ENV=$(grep "^single_environment:" "$ENVIRONMENTS_FILE" | awk '{print $2}' || echo "false")
-mapfile -t CONFIGURED_ENVS < <(grep "^  - " "$ENVIRONMENTS_FILE" | awk '{print $2}')
+
+# POSIX-compatible array population (mapfile requires Bash 4+, macOS ships Bash 3.2)
+CONFIGURED_ENVS=()
+while IFS= read -r line; do
+  CONFIGURED_ENVS+=("$line")
+done < <(grep "^  - " "$ENVIRONMENTS_FILE" | awk '{print $2}')
 
 if [[ "${#CONFIGURED_ENVS[@]}" -lt 2 && "$SINGLE_ENV" != "true" && "$FORCE_SINGLE" != "true" ]]; then
   echo "ERROR: Only one environment is configured but single_environment is not true."
@@ -69,7 +74,7 @@ done
 
 echo "Checking prerequisites..."
 
-for tool in gcloud sentry-cli vercel jq; do
+for tool in gcloud sentry-cli vercel jq node; do
   if ! command -v "$tool" &>/dev/null; then
     echo "ERROR: $tool not found."
     case "$tool" in
@@ -107,17 +112,88 @@ fi
 echo "All prerequisites met."
 echo ""
 
+# ── Vercel helpers ────────────────────────────────────────────────────────────
+
+# Read Vercel project ID and team ID from .vercel/project.json (set by vercel link)
+VERCEL_PROJECT_JSON="$PROJECT_ROOT/.vercel/project.json"
+if [[ ! -f "$VERCEL_PROJECT_JSON" ]]; then
+  echo "ERROR: .vercel/project.json not found. Run 'vercel link' first."
+  exit 1
+fi
+VERCEL_PROJECT_ID=$(node -e "process.stdout.write(JSON.parse(require('fs').readFileSync('$VERCEL_PROJECT_JSON','utf8')).projectId)")
+VERCEL_ORG_ID=$(node -e "process.stdout.write(JSON.parse(require('fs').readFileSync('$VERCEL_PROJECT_JSON','utf8')).orgId ?? '')")
+VERCEL_API_TOKEN=$(vercel whoami --token 2>/dev/null || true)
+
+# Fall back to reading the token from ~/.local/share/com.vercel.cli/auth.json
+if [[ -z "$VERCEL_API_TOKEN" ]]; then
+  VERCEL_API_TOKEN=$(node -e "
+    const f = require('os').homedir() + '/.local/share/com.vercel.cli/auth.json';
+    try { process.stdout.write(JSON.parse(require('fs').readFileSync(f,'utf8')).token ?? ''); } catch {}
+  " 2>/dev/null || true)
+fi
+
+if [[ -z "$VERCEL_API_TOKEN" ]]; then
+  echo "ERROR: Could not read Vercel API token. Run: vercel login"
+  exit 1
+fi
+
+# Upsert a single Vercel env var via the REST API (avoids CLI stdin quote corruption).
+# Usage: vercel_env_upsert KEY VALUE VERCEL_ENV
+vercel_env_upsert() {
+  local key="$1" value="$2" vercel_env="$3"
+  local team_param=""
+  [[ -n "$VERCEL_ORG_ID" ]] && team_param="teamId=${VERCEL_ORG_ID}&"
+
+  local payload
+  payload=$(node -e "process.stdout.write(JSON.stringify({key:process.argv[1],value:process.argv[2],type:'encrypted',target:[process.argv[3]]}))" \
+    "$key" "$value" "$vercel_env")
+
+  local response
+  response=$(curl -sf \
+    -X POST \
+    -H "Authorization: Bearer $VERCEL_API_TOKEN" \
+    -H "Content-Type: application/json" \
+    -d "$payload" \
+    "https://api.vercel.com/v10/projects/${VERCEL_PROJECT_ID}/env?${team_param}upsert=true")
+
+  if [[ -z "$response" ]]; then
+    echo "ERROR: Empty response from Vercel API when upserting $key"
+    exit 1
+  fi
+}
+
+# ── YAML value reader ─────────────────────────────────────────────────────────
+
+# Read a value from deployment/{env}.yml stripping surrounding YAML quotes.
+# Usage: read_yaml_value CONFIG_FILE KEY
+read_yaml_value() {
+  local config_file="$1" key="$2"
+  node - "$config_file" "$key" <<'NODE'
+const fs = require('fs');
+const [,,configFile, key] = process.argv;
+const lines = fs.readFileSync(configFile, 'utf8').split('\n');
+for (const line of lines) {
+  const m = line.match(/^\s+([^:]+):\s*(.*)/);
+  if (m && m[1].trim() === key) {
+    process.stdout.write(m[2].replace(/^["']|["']$/g, '').trim());
+    process.exit(0);
+  }
+}
+process.exit(0);
+NODE
+}
+
 # ── Per-environment rotation ──────────────────────────────────────────────────
 
 rotate_environment() {
   local env="$1"
   local config_file="$DEPLOYMENT_DIR/$env.yml"
 
-  # Map env name to Vercel environment
+  # Map env name to Vercel environment target
   local vercel_env
   case "$env" in
-    staging)    vercel_env="preview" ;;
-    production) vercel_env="production" ;;
+    preview|staging) vercel_env="preview" ;;
+    production)      vercel_env="production" ;;
     *) echo "ERROR: Unknown environment: $env"; exit 1 ;;
   esac
 
@@ -125,17 +201,17 @@ rotate_environment() {
   echo " Rotating $env"
   echo "══════════════════════════════════════════"
 
-  # Read project config
+  # Read project config using the robust YAML reader
   local project_id
-  project_id=$(grep "^  FIREBASE_PROJECT_ID:" "$config_file" | awk -F'"' '{print $2}' | tr -d ' ')
+  project_id=$(read_yaml_value "$config_file" "FIREBASE_PROJECT_ID")
   if [[ -z "$project_id" ]]; then
     echo "ERROR: FIREBASE_PROJECT_ID not set in $config_file"
     exit 1
   fi
 
   local sentry_org sentry_project
-  sentry_org=$(grep "^  SENTRY_ORG:" "$config_file" | awk -F'"' '{print $2}' | tr -d ' ')
-  sentry_project=$(grep "^  SENTRY_PROJECT:" "$config_file" | awk -F'"' '{print $2}' | tr -d ' ')
+  sentry_org=$(read_yaml_value "$config_file" "SENTRY_ORG")
+  sentry_project=$(read_yaml_value "$config_file" "SENTRY_PROJECT")
 
   # Resolve service account email
   local sa_email
@@ -150,7 +226,10 @@ rotate_environment() {
 
   # Capture the current key IDs before creating new ones
   echo "1. Capturing existing Firebase key IDs..."
-  mapfile -t OLD_KEY_IDS < <(gcloud iam service-accounts keys list \
+  OLD_KEY_IDS=()
+  while IFS= read -r line; do
+    OLD_KEY_IDS+=("$line")
+  done < <(gcloud iam service-accounts keys list \
     --iam-account="$sa_email" \
     --project="$project_id" \
     --managed-by=user \
@@ -167,12 +246,12 @@ rotate_environment() {
 
   local new_client_email new_private_key
   new_client_email=$(jq -r '.client_email' "$key_file")
-  # Vercel requires literal \n in the private key value
+  # Vercel requires literal \n in the private key value (not actual newlines)
   new_private_key=$(jq -r '.private_key' "$key_file" | awk '{printf "%s\\n", $0}' | sed 's/\\n$//')
 
   # Create new Sentry token
   echo "3. Creating new Sentry auth token..."
-  local new_sentry_token
+  local new_sentry_token=""
   if [[ -n "$sentry_org" && -n "$sentry_project" ]]; then
     new_sentry_token=$(curl -sf \
       -H "Authorization: Bearer $SENTRY_TOKEN" \
@@ -185,20 +264,18 @@ rotate_environment() {
     fi
   else
     echo "   (Sentry not configured for $env — skipping)"
-    new_sentry_token=""
   fi
 
-  # Update Vercel
+  # Update Vercel via REST API (avoids CLI stdin quote corruption)
   echo "4. Updating Vercel ($vercel_env)..."
-  for key in FIREBASE_CLIENT_EMAIL FIREBASE_PRIVATE_KEY; do
-    vercel env rm "$key" "$vercel_env" --yes 2>/dev/null || true
-  done
-  echo "$new_client_email" | vercel env add FIREBASE_CLIENT_EMAIL "$vercel_env"
-  echo "$new_private_key"  | vercel env add FIREBASE_PRIVATE_KEY "$vercel_env"
+  vercel_env_upsert FIREBASE_CLIENT_EMAIL "$new_client_email" "$vercel_env"
+  echo "   Updated FIREBASE_CLIENT_EMAIL"
+  vercel_env_upsert FIREBASE_PRIVATE_KEY "$new_private_key" "$vercel_env"
+  echo "   Updated FIREBASE_PRIVATE_KEY"
 
   if [[ -n "$new_sentry_token" ]]; then
-    vercel env rm SENTRY_AUTH_TOKEN "$vercel_env" --yes 2>/dev/null || true
-    echo "$new_sentry_token" | vercel env add SENTRY_AUTH_TOKEN "$vercel_env"
+    vercel_env_upsert SENTRY_AUTH_TOKEN "$new_sentry_token" "$vercel_env"
+    echo "   Updated SENTRY_AUTH_TOKEN"
   fi
 
   # Trigger redeploy and wait
