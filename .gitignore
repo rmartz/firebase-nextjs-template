@@ -10,3 +10,9 @@ tsconfig.tsbuildinfo
 .env.sentry-build-plugin
 storybook-static
 next-env.d.ts
+
+# Terraform — state and working directory are machine-local
+# (terraform/.gitignore covers the terraform/ subdirectory;
+# these patterns catch accidental state files placed at the root)
+*.tfstate
+*.tfstate.backup

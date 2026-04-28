@@ -1,0 +1,14 @@
+# Terraform working directory — fetched by `terraform init`, not committed
+.terraform/
+
+# State files — use remote state for shared/CI workflows
+*.tfstate
+*.tfstate.backup
+
+# Lock file — commit this once generated (`terraform init` creates it)
+# Uncomment the line below only if you intentionally want to skip it:
+# .terraform.lock.hcl
+
+# Variable values — may contain sensitive IDs
+terraform.tfvars
+*.auto.tfvars

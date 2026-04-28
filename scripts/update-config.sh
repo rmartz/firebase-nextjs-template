@@ -4,21 +4,17 @@
 # Usage:
 #   scripts/update-config.sh --env=preview KEY=value [KEY=value ...]
 #   scripts/update-config.sh --env=production --firebase-config=/path/to/config.json
-#   scripts/update-config.sh --env=preview --firebase-config=... --sync
 #
 # The --firebase-config flag accepts the path to a JSON file containing the
 # firebaseConfig object exported from the Firebase console. It extracts and maps
 # the relevant NEXT_PUBLIC_FIREBASE_* keys automatically. Both strict JSON and
 # the JavaScript object literal format produced by the Firebase console are accepted.
 #
-# Pass --sync to also push the updated values to Vercel immediately after writing
-# the YAML (calls deploy-config.sh). Without --sync, only the local YAML is updated.
-#
-# To deploy without modifying the YAML, run deploy-config.sh directly:
-#   scripts/deploy-config.sh --env=preview
-#
 # Sensitive values must NEVER be passed as KEY=value arguments — they will appear
 # in shell history and ps output. Use `pnpm exec vercel env add` directly for secrets.
+#
+# To push the updated YAML values to Vercel, run terraform apply from terraform/:
+#   cd terraform && terraform apply
 #
 # Requires: node
 
@@ -32,14 +28,12 @@ DEPLOYMENT_DIR="$PROJECT_ROOT/deployment"
 
 ENV_NAME=""
 FIREBASE_CONFIG_FILE=""
-SYNC=false
 declare -a KEY_VALUE_PAIRS=()
 
 for arg in "$@"; do
   case "$arg" in
     --env=*) ENV_NAME="${arg#--env=}" ;;
     --firebase-config=*) FIREBASE_CONFIG_FILE="${arg#--firebase-config=}" ;;
-    --sync) SYNC=true ;;
     *=*) KEY_VALUE_PAIRS+=("$arg") ;;
     *) echo "ERROR: Unknown argument: $arg"; exit 1 ;;
   esac
@@ -237,12 +231,5 @@ echo ""
 echo "Validating against schema..."
 node "$SCRIPT_DIR/validate-config.mjs" --env="$ENV_NAME"
 
-# ── Sync to Vercel (optional) ─────────────────────────────────────────────────
-
-if [[ "$SYNC" == "true" ]]; then
-  echo ""
-  exec "$SCRIPT_DIR/deploy-config.sh" --env="$ENV_NAME"
-fi
-
 echo ""
-echo "YAML updated. Run 'scripts/deploy-config.sh --env=$ENV_NAME' to push to Vercel."
+echo "YAML updated. Run 'cd terraform && terraform apply' to push to Vercel."

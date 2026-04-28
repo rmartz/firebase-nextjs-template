@@ -1,0 +1,10 @@
+# Copy this file to terraform.tfvars and fill in your values.
+# terraform.tfvars is gitignored — never commit it.
+#
+# API token goes in your environment, not here:
+#   export VERCEL_API_TOKEN=<your-token>
+
+vercel_project_id = "prj_xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+# Team accounts only — remove or leave commented for personal accounts:
+# vercel_team_id = "team_xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
