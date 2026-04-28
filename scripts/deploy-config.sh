@@ -88,11 +88,11 @@ const path = require('path');
 
 const [,, projectRoot, configFile, vercelEnv] = process.argv;
 
-// Load project ID
+// Load project ID and team ID
 const projectJson = JSON.parse(
   fs.readFileSync(path.join(projectRoot, '.vercel', 'project.json'), 'utf8')
 );
-const projectId = projectJson.projectId;
+const { projectId, orgId } = projectJson;
 if (!projectId) {
   process.stderr.write('ERROR: projectId missing from .vercel/project.json\n');
   process.exit(1);
@@ -142,7 +142,7 @@ function upsert(key, value) {
     const body = JSON.stringify({ key, value, type: 'plain', target: [vercelEnv] });
     const options = {
       hostname: 'api.vercel.com',
-      path: `/v10/projects/${projectId}/env?upsert=true`,
+      path: `/v10/projects/${projectId}/env?teamId=${orgId}&upsert=true`,
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
