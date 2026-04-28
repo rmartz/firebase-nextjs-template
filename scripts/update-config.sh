@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Updates a public environment config file and syncs all its variables to Vercel.
+# Updates a public environment config file.
 #
 # Usage:
 #   scripts/update-config.sh --env=staging KEY=value [KEY=value ...]
@@ -10,9 +10,12 @@
 # the relevant NEXT_PUBLIC_FIREBASE_* keys automatically.
 #
 # Sensitive values must NEVER be passed as KEY=value arguments — they will appear
-# in shell history and ps output. Use `vercel env add` directly for secrets.
+# in shell history and ps output. Use `pnpm exec vercel env add` directly for secrets.
 #
-# Requires: node, vercel CLI authenticated via `vercel login`
+# To push the updated YAML values to Vercel, run terraform apply from terraform/:
+#   cd terraform && terraform apply
+#
+# Requires: node
 
 set -euo pipefail
 
@@ -43,18 +46,6 @@ fi
 CONFIG_FILE="$DEPLOYMENT_DIR/$ENV_NAME.yml"
 if [[ ! -f "$CONFIG_FILE" ]]; then
   echo "ERROR: $CONFIG_FILE not found. Create it first."
-  exit 1
-fi
-
-# ── Prerequisites ─────────────────────────────────────────────────────────────
-
-if ! command -v vercel &>/dev/null; then
-  echo "ERROR: vercel CLI not found. Install with: pnpm add -g vercel"
-  exit 1
-fi
-
-if ! vercel whoami &>/dev/null 2>&1; then
-  echo "ERROR: Not authenticated with Vercel. Run: vercel login"
   exit 1
 fi
 
@@ -142,26 +133,5 @@ echo ""
 echo "Validating against schema..."
 node "$SCRIPT_DIR/validate-config.mjs" --env="$ENV_NAME"
 
-# ── Sync to Vercel ────────────────────────────────────────────────────────────
-
-# Map environment name to Vercel environment target
-case "$ENV_NAME" in
-  staging)    VERCEL_ENV="preview" ;;
-  production) VERCEL_ENV="production" ;;
-  *) echo "ERROR: Unknown environment: $ENV_NAME"; exit 1 ;;
-esac
-
 echo ""
-echo "Syncing to Vercel ($VERCEL_ENV)..."
-
-for pair in "${KEY_VALUE_PAIRS[@]}"; do
-  KEY="${pair%%=*}"
-  VALUE="${pair#*=}"
-  # Remove existing value then add new one (vercel env add errors if key exists)
-  vercel env rm "$KEY" "$VERCEL_ENV" --yes 2>/dev/null || true
-  echo "$VALUE" | vercel env add "$KEY" "$VERCEL_ENV"
-  echo "  Synced $KEY"
-done
-
-echo ""
-echo "Done. Run 'pnpm env:pull' to refresh your local .env.local."
+echo "YAML updated. Run 'cd terraform && terraform apply' to push to Vercel."
