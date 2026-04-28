@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Generates .env.local in the project root by pulling from Vercel's stored
-# environment variables for the staging (preview) environment.
+# environment variables for the preview environment.
 #
 # Usage: scripts/generate-local-env.sh
 #
-# Requires: vercel CLI authenticated via `vercel login`
+# Requires: pnpm (vercel as devDependency), authenticated via `pnpm exec vercel login`
 
 set -euo pipefail
 
@@ -13,15 +13,14 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 # ── Prerequisites ─────────────────────────────────────────────────────────────
 
-if ! command -v vercel &>/dev/null; then
-  echo "ERROR: vercel CLI not found."
-  echo "Install it with: pnpm add -g vercel"
+if ! command -v pnpm &>/dev/null; then
+  echo "ERROR: pnpm not found. Install from https://pnpm.io/installation"
   exit 1
 fi
 
-if ! vercel whoami &>/dev/null 2>&1; then
+if ! pnpm exec vercel whoami &>/dev/null 2>&1; then
   echo "ERROR: Not authenticated with Vercel."
-  echo "Run: vercel login"
+  echo "Run: pnpm exec vercel login"
   exit 1
 fi
 
@@ -29,8 +28,8 @@ fi
 
 OUTPUT="$PROJECT_ROOT/.env.local"
 
-echo "Pulling staging environment variables from Vercel..."
-vercel env pull "$OUTPUT" --environment=preview --yes
+echo "Pulling preview environment variables from Vercel..."
+pnpm exec vercel env pull "$OUTPUT" --environment=preview --yes
 
 echo ""
 echo "Written to .env.local (gitignored — do not commit)."

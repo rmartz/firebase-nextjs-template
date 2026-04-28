@@ -91,12 +91,13 @@ project-root/
 ├── deployment/
 │   ├── schema.yml              # Allowlist schema for public config keys
 │   ├── environments.yml        # Active environment list
-│   ├── staging.yml             # Public env config for staging
+│   ├── preview.yml             # Public env config for preview (staging)
 │   └── production.yml          # Public env config for production
 ├── scripts/
 │   ├── validate-config.mjs     # Validates deployment YAMLs against schema
 │   ├── secrets-check.mjs       # Pre-commit: config validation + gitleaks
-│   ├── update-config.sh        # Update a deployment YAML and sync to Vercel
+│   ├── update-config.sh        # Update a deployment YAML (optionally sync to Vercel)
+│   ├── deploy-config.sh        # Push deployment YAML values to Vercel
 │   ├── rotate-keys.sh          # Zero-downtime Firebase + Sentry + Vercel key rotation
 │   └── generate-local-env.sh   # Pull .env.local via vercel env pull
 ├── .storybook/                 # Storybook configuration
@@ -128,9 +129,11 @@ Public, non-secret environment config (Firebase project IDs, Sentry org/project,
 To update a public config value and sync it to Vercel:
 
 ```bash
-scripts/update-config.sh staging NEXT_PUBLIC_FIREBASE_PROJECT_ID my-project-id
+scripts/update-config.sh --env=preview NEXT_PUBLIC_FIREBASE_PROJECT_ID=my-project-id
 # or from a Firebase console JSON download:
-scripts/update-config.sh staging --firebase-config=~/Downloads/firebase-config.json
+scripts/update-config.sh --env=preview --firebase-config=~/Downloads/firebase-config.json
+# to also push to Vercel immediately:
+scripts/update-config.sh --env=preview --firebase-config=~/Downloads/firebase-config.json --sync
 ```
 
 ### Secret Rotation
@@ -138,8 +141,8 @@ scripts/update-config.sh staging --firebase-config=~/Downloads/firebase-config.j
 To rotate all secrets (Firebase service account, Sentry token, Vercel env) with zero downtime:
 
 ```bash
-# Prereqs: gcloud auth login && vercel login && sentry-cli login
-scripts/rotate-keys.sh staging
+# Prereqs: gcloud auth login && pnpm exec vercel login && sentry-cli login
+scripts/rotate-keys.sh --env=preview
 ```
 
 The script creates the new credential, deploys it, waits for a healthy response, then decommissions the old one. No master rotation keys are stored in Vercel.

@@ -1,4 +1,4 @@
-# Public environment variables for the staging environment.
+# Public environment variables for the preview (staging) environment.
 #
 # Only non-sensitive variables belong here. All keys are validated against
 # deployment/schema.yml — sensitive variables (private keys, auth tokens, DSNs)
@@ -7,9 +7,9 @@
 # Sensitive variables are managed directly in Vercel and are never committed.
 # Run `pnpm env:pull` to generate a local .env.local from Vercel's stored values.
 #
-# To update these values and sync them to Vercel: scripts/update-config.sh --env=staging
+# To update these values and sync them to Vercel: scripts/update-config.sh --env=preview
 
-environment: staging
+environment: preview
 
 variables:
   # Firebase Client SDK — safe to expose; access control is enforced by Firebase security rules
