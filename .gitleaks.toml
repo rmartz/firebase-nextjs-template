@@ -1,8 +1,9 @@
 # gitleaks configuration for firebase-nextjs-template
-# Extends the default ruleset with project-specific patterns and allowlists.
+# Extends the base ruleset from vercel-deploy-scripts (Firebase + Vercel patterns).
+# Only project-specific allowlists belong below.
 
 [extend]
-useDefault = true
+path = "node_modules/vercel-deploy-scripts/.gitleaks.toml"
 
 [allowlist]
 description = "Known safe patterns — placeholder values in documentation and config examples"
@@ -16,21 +17,3 @@ paths = [
   ".env.example",
   "deployment/.*\\.yml",
 ]
-
-[[rules]]
-id = "firebase-private-key"
-description = "Firebase service account private key"
-regex = '''-----BEGIN (RSA )?PRIVATE KEY-----'''
-tags = ["firebase", "key"]
-
-[[rules]]
-id = "firebase-admin-json"
-description = "Firebase service account JSON blob"
-regex = '''"private_key_id"\s*:\s*"[a-f0-9]{40}"'''
-tags = ["firebase", "key"]
-
-[[rules]]
-id = "vercel-token"
-description = "Vercel API token"
-regex = '''(?i)vercel[_-]?token['":\s=]+[A-Za-z0-9]{24,}'''
-tags = ["vercel"]
