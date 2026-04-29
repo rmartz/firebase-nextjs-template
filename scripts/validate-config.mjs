@@ -100,11 +100,13 @@ function validateConfig(envName, schema) {
   const content = readFileSync(configPath, "utf8");
   const inVariablesSection = [];
   let inVars = false;
+  let foundVariablesBlock = false;
   for (const rawLine of content.split("\n")) {
     const line = rawLine.replace(/#.*$/, "");
     const trimmed = line.trim();
     if (trimmed === "variables:") {
       inVars = true;
+      foundVariablesBlock = true;
       continue;
     }
     if (inVars && trimmed && !trimmed.startsWith("#")) {
@@ -125,6 +127,12 @@ function validateConfig(envName, schema) {
   }
 
   const errors = [];
+  if (!foundVariablesBlock) {
+    errors.push(
+      `  MISSING  variables:  (no variables: block found in deployment/${envName}.yml)`,
+    );
+    return errors;
+  }
   for (const key of inVariablesSection) {
     const isDenied = schema.deniedPatterns.some((p) => globMatch(p, key));
     if (isDenied) {
