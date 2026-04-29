@@ -16,9 +16,9 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "prepare": "husky",
-    "env:pull": "scripts/generate-local-env.sh",
+    "env:pull": "generate-local-env",
     "env:validate": "node scripts/validate-config.mjs",
-    "secrets-check": "node scripts/secrets-check.mjs"
+    "secrets-check": "node scripts/validate-config.mjs && secrets-check --config .gitleaks.toml"
   },
   "lint-staged": {
     "*.{js,mjs,cjs,ts,tsx,jsx}": [
@@ -78,6 +78,7 @@
     "typescript": "^6",
     "typescript-eslint": "^8.59.0",
     "vite": "^8.0.10",
+    "vercel-deploy-scripts": "github:rmartz/vercel-deploy-scripts#v1.1.0",
     "vitest": "^4.1.5"
   }
 }
