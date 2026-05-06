@@ -1,6 +1,6 @@
 node_modules
 dist
 .next
-.claude/worktrees
+.claude
 src/components/ui
 pnpm-lock.yaml
