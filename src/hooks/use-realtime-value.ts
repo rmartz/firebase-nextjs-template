@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import {
+  get,
   onValue,
   type DatabaseReference,
   type DataSnapshot,
@@ -40,20 +41,9 @@ export function useRealtimeValue<T>(
 
   return useQuery<T>({
     queryKey,
-    queryFn: () => {
+    queryFn: async () => {
       if (!ref) throw new Error("ref is required");
-      return new Promise<T>((resolve, reject) => {
-        onValue(
-          ref,
-          (s) => {
-            resolve(deserializeRef.current(s));
-          },
-          reject,
-          {
-            onlyOnce: true,
-          },
-        );
-      });
+      return deserializeRef.current(await get(ref));
     },
     enabled: ref !== undefined,
   });

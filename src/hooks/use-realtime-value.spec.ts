@@ -7,7 +7,7 @@ import { useRealtimeValue } from "./use-realtime-value";
 
 afterEach(cleanup);
 
-vi.mock("firebase/database", () => ({ onValue: vi.fn() }));
+vi.mock("firebase/database", () => ({ get: vi.fn(), onValue: vi.fn() }));
 
 const makeRef = () =>
   ({ toString: () => "https://test.firebaseio.com/path" }) as DatabaseReference;
@@ -38,7 +38,8 @@ describe("useRealtimeValue", () => {
   });
 
   it("calls onValue with the ref when ref is provided", async () => {
-    const { onValue } = await import("firebase/database");
+    const { get, onValue } = await import("firebase/database");
+    (get as Mock).mockResolvedValue(makeSnapshot("value"));
     (onValue as Mock).mockImplementation(
       (_ref: unknown, cb: (s: DataSnapshot) => void) => {
         cb(makeSnapshot("value"));
@@ -56,14 +57,10 @@ describe("useRealtimeValue", () => {
     expect(onValue).toHaveBeenCalledWith(ref, expect.any(Function));
   });
 
-  it("returns deserialized data after the subscription fires", async () => {
-    const { onValue } = await import("firebase/database");
-    (onValue as Mock).mockImplementation(
-      (_ref: unknown, cb: (s: DataSnapshot) => void) => {
-        cb(makeSnapshot("hello"));
-        return vi.fn();
-      },
-    );
+  it("returns deserialized data from the initial get()", async () => {
+    const { get, onValue } = await import("firebase/database");
+    (get as Mock).mockResolvedValue(makeSnapshot("hello"));
+    (onValue as Mock).mockReturnValue(vi.fn());
     const { wrapper } = makeWrapper();
 
     const { result } = renderHook(

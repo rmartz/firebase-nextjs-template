@@ -167,7 +167,7 @@ See `firestore.rules` for the default deny-all scaffold with a uid-scoped exampl
 `firebase.json` configures local emulators for Auth, RTDB, and Firestore. Run them during development and testing to avoid touching production data:
 
 ```bash
-firebase emulators:start
+pnpm emulator
 ```
 
 Point tests at the emulator by setting environment variables before running Vitest:
