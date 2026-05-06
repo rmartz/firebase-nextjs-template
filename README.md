@@ -95,8 +95,7 @@ project-root/
 │   └── production.yml          # Public env config for production
 ├── scripts/
 │   ├── validate-config.mjs     # Validates deployment YAMLs against schema
-│   ├── update-config.sh        # Update a deployment YAML (optionally sync to Vercel)
-│   └── rotate-keys.sh          # Zero-downtime Firebase + Sentry + Vercel key rotation
+│   └── update-config.sh        # Update a deployment YAML (optionally sync to Vercel)
 ├── .storybook/                 # Storybook configuration
 ├── .github/
 │   ├── actions/setup/          # Composite action: pnpm + Node.js + install
@@ -137,14 +136,15 @@ pnpm exec sync-env --env=preview
 
 ### Secret Rotation
 
-To rotate all secrets (Firebase service account, Sentry token, Vercel env) with zero downtime:
+To rotate all secrets (Firebase service account, Sentry token) with zero downtime:
 
 ```bash
-# Prereqs: gcloud auth login && pnpm exec vercel login && sentry-cli login
-scripts/rotate-keys.sh --env=preview
+# Prereqs: gcloud auth login && pnpm exec vercel login
+# SENTRY_AUTH_TOKEN must be set in the shell environment when Sentry is configured
+pnpm exec sync-env --rotate-keys --env=preview
 ```
 
-The script creates the new credential, deploys it, waits for a healthy response, then decommissions the old one. No master rotation keys are stored in Vercel.
+Creates the new credential, pushes it to Vercel, redeploys, waits for a healthy response, then decommissions the old one. No master rotation keys are stored in Vercel. Use `--init` on a fresh project to bootstrap secrets for the first time.
 
 ### GitHub Actions
 
