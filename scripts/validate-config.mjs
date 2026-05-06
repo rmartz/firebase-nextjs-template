@@ -85,7 +85,7 @@ function loadSchema() {
 
 function loadEnvironments() {
   const content = readFileSync(join(deploymentDir, "environments.yml"), "utf8");
-  const envs = parseYamlList(content, "environments");
+  const envs = parseYamlList(content, "active");
   const parsed = parseYamlSimple(content);
   const singleEnv = parsed["single_environment"] === "true";
   return { environments: envs, singleEnvironment: singleEnv };
