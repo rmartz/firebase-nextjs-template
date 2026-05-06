@@ -10,7 +10,7 @@
 # distinction). The default is false — both environments must be present.
 
 environments:
-  - staging
+  - preview
   - production
 
 single_environment: false

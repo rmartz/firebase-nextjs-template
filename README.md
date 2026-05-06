@@ -91,15 +91,13 @@ project-root/
 ├── deployment/
 │   ├── schema.yml              # Allowlist schema for public config keys
 │   ├── environments.yml        # Active environment list
-│   ├── staging.yml             # Public env config for staging
+│   ├── preview.yml             # Public env config for preview (staging)
 │   └── production.yml          # Public env config for production
-├── terraform/
-│   ├── main.tf                 # Vercel env var resources driven from deployment YAMLs
-│   └── variables.tf            # vercel_project_id, vercel_team_id
 ├── scripts/
 │   ├── validate-config.mjs     # Validates deployment YAMLs against schema
 │   ├── secrets-check.mjs       # Pre-commit: config validation + gitleaks
-│   ├── update-config.sh        # Update a deployment YAML (use terraform apply to push)
+│   ├── update-config.sh        # Update a deployment YAML (optionally sync to Vercel)
+│   ├── deploy-config.sh        # Push deployment YAML values to Vercel
 │   ├── rotate-keys.sh          # Zero-downtime Firebase + Sentry + Vercel key rotation
 │   └── generate-local-env.sh   # Pull .env.local via vercel env pull
 ├── .storybook/                 # Storybook configuration
@@ -128,16 +126,14 @@ project-root/
 
 Public, non-secret environment config (Firebase project IDs, Sentry org/project, `NEXT_PUBLIC_*` keys) lives in `deployment/{env}.yml` and is validated against `deployment/schema.yml` on every commit and in CI. Secrets never go in these files.
 
-To update a public config value:
+To update a public config value and sync it to Vercel:
 
 ```bash
-# Edit the YAML
-scripts/update-config.sh --env=staging NEXT_PUBLIC_FIREBASE_PROJECT_ID=my-project-id
+scripts/update-config.sh --env=preview NEXT_PUBLIC_FIREBASE_PROJECT_ID=my-project-id
 # or from a Firebase console JSON download:
-scripts/update-config.sh --env=staging --firebase-config=~/Downloads/firebase-config.json
-
-# Push to Vercel via Terraform (see terraform/terraform.tfvars.example for setup)
-cd terraform && terraform apply
+scripts/update-config.sh --env=preview --firebase-config=~/Downloads/firebase-config.json
+# to also push to Vercel immediately:
+scripts/update-config.sh --env=preview --firebase-config=~/Downloads/firebase-config.json --sync
 ```
 
 ### Secret Rotation
@@ -146,7 +142,7 @@ To rotate all secrets (Firebase service account, Sentry token, Vercel env) with 
 
 ```bash
 # Prereqs: gcloud auth login && pnpm exec vercel login && sentry-cli login
-scripts/rotate-keys.sh --env=staging
+scripts/rotate-keys.sh --env=preview
 ```
 
 The script creates the new credential, deploys it, waits for a healthy response, then decommissions the old one. No master rotation keys are stored in Vercel.
