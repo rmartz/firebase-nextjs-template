@@ -9,7 +9,7 @@
 # a single environment (e.g. ephemeral data with no meaningful preview/prod
 # distinction). The default is false — both environments must be present.
 
-environments:
+active:
   - preview
   - production
 
