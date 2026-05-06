@@ -26,8 +26,8 @@ Public (non-secret) environment config lives in `deployment/{env}.yml` and is va
 
 - To update a public config value (YAML only): `scripts/update-config.sh --env=<env> KEY=value`
 - To update and immediately push to Vercel: `scripts/update-config.sh --env=<env> KEY=value --sync`
-- To push current YAML values to Vercel without modifying YAML: `scripts/deploy-config.sh --env=<env>`
-- To rotate all secrets (Firebase + Sentry + Vercel): `scripts/rotate-keys.sh --env=<env>`
+- To push current YAML values to Vercel without modifying YAML: `pnpm exec sync-env --env=<env>`
+- To rotate all secrets (Firebase + Sentry) with zero downtime: `pnpm exec sync-env --rotate-keys --env=<env>`
 - Secrets checks run automatically on every commit via `.husky/pre-commit`; also enforced in CI via `.github/workflows/secret-scan.yml`
 
 ## TypeScript
