@@ -17,6 +17,7 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "prepare": "husky",
+    "emulator": "firebase emulators:start",
     "env:pull": "generate-local-env",
     "env:validate": "node scripts/validate-config.mjs",
     "secrets-check": "node scripts/validate-config.mjs && secrets-check --config .gitleaks.toml"
