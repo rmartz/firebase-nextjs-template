@@ -95,11 +95,8 @@ project-root/
 │   └── production.yml          # Public env config for production
 ├── scripts/
 │   ├── validate-config.mjs     # Validates deployment YAMLs against schema
-│   ├── secrets-check.mjs       # Pre-commit: config validation + gitleaks
 │   ├── update-config.sh        # Update a deployment YAML (optionally sync to Vercel)
-│   ├── deploy-config.sh        # Push deployment YAML values to Vercel
-│   ├── rotate-keys.sh          # Zero-downtime Firebase + Sentry + Vercel key rotation
-│   └── generate-local-env.sh   # Pull .env.local via vercel env pull
+│   └── rotate-keys.sh          # Zero-downtime Firebase + Sentry + Vercel key rotation
 ├── .storybook/                 # Storybook configuration
 ├── .github/
 │   ├── actions/setup/          # Composite action: pnpm + Node.js + install
@@ -134,6 +131,8 @@ scripts/update-config.sh --env=preview NEXT_PUBLIC_FIREBASE_PROJECT_ID=my-projec
 scripts/update-config.sh --env=preview --firebase-config=~/Downloads/firebase-config.json
 # to also push to Vercel immediately:
 scripts/update-config.sh --env=preview --firebase-config=~/Downloads/firebase-config.json --sync
+# to push current YAML values to Vercel without modifying YAML:
+pnpm exec sync-env --env=preview
 ```
 
 ### Secret Rotation

@@ -12,10 +12,10 @@
 # the JavaScript object literal format produced by the Firebase console are accepted.
 #
 # Pass --sync to also push the updated values to Vercel immediately after writing
-# the YAML (calls deploy-config.sh). Without --sync, only the local YAML is updated.
+# the YAML (calls sync-env). Without --sync, only the local YAML is updated.
 #
-# To deploy without modifying the YAML, run deploy-config.sh directly:
-#   scripts/deploy-config.sh --env=preview
+# To deploy without modifying the YAML, run sync-env directly:
+#   pnpm exec sync-env --env=preview
 #
 # Sensitive values must NEVER be passed as KEY=value arguments — they will appear
 # in shell history and ps output. Use `pnpm exec vercel env add` directly for secrets.
@@ -241,8 +241,8 @@ node "$SCRIPT_DIR/validate-config.mjs" --env="$ENV_NAME"
 
 if [[ "$SYNC" == "true" ]]; then
   echo ""
-  exec "$SCRIPT_DIR/deploy-config.sh" --env="$ENV_NAME"
+  exec pnpm exec sync-env --env="$ENV_NAME"
 fi
 
 echo ""
-echo "YAML updated. Run 'scripts/deploy-config.sh --env=$ENV_NAME' to push to Vercel."
+echo "YAML updated. Run 'pnpm exec sync-env --env=$ENV_NAME' to push to Vercel."
