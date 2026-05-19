@@ -13,6 +13,7 @@ export default tseslint.config(
       "**/next-env.d.ts",
       ".storybook/**",
       ".claude/**",
+      ".git-worktrees/**",
       "storybook-static/**",
       "vitest.config.mts",
       "src/components/ui/**",
