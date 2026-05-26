@@ -7,7 +7,12 @@ import {
   type DocumentReference,
   type DocumentSnapshot,
 } from "firebase/firestore";
-import { useQuery, useQueryClient, type QueryKey } from "@tanstack/react-query";
+import {
+  useQuery,
+  useQueryClient,
+  type QueryKey,
+  type UseQueryResult,
+} from "@tanstack/react-query";
 
 /**
  * Subscribes to a Firestore document and keeps TanStack Query's cache in sync.
@@ -23,7 +28,7 @@ export function useFirestoreDocument<T>(
   ref: DocumentReference | undefined,
   deserialize: (snapshot: DocumentSnapshot) => T | undefined,
   queryKey: QueryKey,
-) {
+): UseQueryResult<T | undefined> {
   const queryClient = useQueryClient();
   const queryKeyRef = useRef(queryKey);
   queryKeyRef.current = queryKey;
