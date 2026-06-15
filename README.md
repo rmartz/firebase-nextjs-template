@@ -153,7 +153,6 @@ CI runs automatically on every PR with four parallel checks: tests, lint, format
 Additional workflows:
 
 - **Secret Scan** — Runs gitleaks and validates deployment config on every PR and push to `main`
-- **Claude Code** — Enables `@claude` mentions in issues and PRs (requires `ANTHROPIC_API_KEY` secret)
 
 ## License
 
