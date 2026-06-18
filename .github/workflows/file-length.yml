@@ -18,11 +18,11 @@ jobs:
 
       - name: Check changed file lengths
         run: |
-          # Thresholds from CLAUDE.md — 2× the split threshold ("+100% of recommended max")
-          # Source files: recommended split at ~240 lines → CI fails at 480+
-          # Test files:   recommended split at ~360 lines → CI fails at 720+
-          SOURCE_LIMIT=480
-          TEST_LIMIT=720
+          # Thresholds from CLAUDE.md — hard cap at 2× the recommended maximum (+100% over)
+          # Source files: recommended max ~200 lines, +20% review pushback at 240 → CI fails at 400+
+          # Test files:   recommended max ~300 lines, +20% review pushback at 360 → CI fails at 600+
+          SOURCE_LIMIT=400
+          TEST_LIMIT=600
 
           failed=0
 
@@ -59,8 +59,8 @@ jobs:
           if [ "$failed" -ne 0 ]; then
             echo ""
             echo "One or more files exceed the maximum allowed line count."
-            echo "  Source files: split at ~240 lines, CI fails at ${SOURCE_LIMIT}+"
-            echo "  Test files:   split at ~360 lines, CI fails at ${TEST_LIMIT}+"
+            echo "  Source files: recommended max ~200 lines, CI hard cap at ${SOURCE_LIMIT}+"
+            echo "  Test files:   recommended max ~300 lines, CI hard cap at ${TEST_LIMIT}+"
             echo "Split large files by logical concern before merging."
             exit 1
           fi
