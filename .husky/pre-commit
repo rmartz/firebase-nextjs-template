@@ -1,3 +1,8 @@
+# Skip in git worktrees — .git is a file there (not a directory).
+# Agent commits in worktrees are covered by claude/hooks/pre-commit instead.
+if [ -f ".git" ]; then
+  exit 0
+fi
 pnpm exec lint-staged
 pnpm run secrets-check
 bash scripts/check-file-length.sh --staged
