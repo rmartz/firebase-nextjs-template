@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Pre-commit guards for agent commits in git worktrees.
+# Installed via core.hooksPath=claude/hooks by new-worktree.py when this file is present.
+# lint-staged is omitted — PostToolUse Prettier/ESLint hooks already run on every edit.
+set -e
+pnpm run secrets-check
+bash scripts/check-file-length.sh --staged
