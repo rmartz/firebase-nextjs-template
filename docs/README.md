@@ -37,6 +37,7 @@ tags: [deployment, config]
 
 - [update-config.sh](scripts/update-config.md) — update public deployment config, validate it, and optionally sync to Vercel.
 - [validate-config.mjs](scripts/validate-config.md) — validate deployment config files against the schema.
+- [validate-docs.mjs](scripts/validate-docs.md) — validate the OKF frontmatter on these docs pages.
 
 ### Subsystems
 
