@@ -45,6 +45,15 @@ jobs:
       - uses: ./.github/actions/setup
       - run: pnpm run format:check
 
+  docs:
+    name: Docs (OKF)
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - run: pnpm run docs:validate
+
   build:
     name: Build
     runs-on: ubuntu-latest
