@@ -84,6 +84,14 @@ Public (non-secret) environment config lives in `deployment/{env}.yml` and is va
 ## Documentation
 
 - Keep documentation in sync with the code — outdated docs are worse than no docs.
+- Reference pages for scripts and subsystems live under `docs/`, structured to Google's
+  Open Knowledge Format (OKF) — one markdown file per script or subsystem, each with YAML
+  frontmatter. See [`docs/README.md`](docs/README.md) for the index, the `type` vocabulary
+  (`Script`, `Subsystem`, `Index`), and the frontmatter shape.
+- When you add or non-trivially change a script under `scripts/` or a subsystem, add or update
+  its `docs/` page in the same PR, including the OKF frontmatter (`type` is required; `title`,
+  `description`, `resource`, and `tags` are recommended). Cross-link related pages with plain
+  markdown links.
 
 ## React / Next.js Standards
 

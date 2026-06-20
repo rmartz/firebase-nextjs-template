@@ -1,0 +1,37 @@
+---
+type: Subsystem
+title: Deployment config
+description: How public env config is stored as committed YAML, validated against a schema, and synced to Vercel — and how secrets are kept out and rotated.
+resource: deployment/
+tags: [deployment, config, vercel, firebase, sentry, secrets]
+---
+
+# Deployment config
+
+Public, non-secret environment configuration is committed to the repo as YAML under `deployment/` and pushed to Vercel from there. Secrets never live in these files — a schema rejects anything secret-like, and credentials are managed separately through `sync-env`.
+
+## Files
+
+- `deployment/{env}.yml` — the public config for one environment (`preview`, `production`). Keys live under a `variables:` block.
+- `deployment/schema.yml` — the allow/deny rules. `allowed_patterns` (e.g. `NEXT_PUBLIC_*`), `allowed_keys` (explicit non-sensitive server keys), and `denied_patterns` (`*SECRET*`, `*_TOKEN*`, `*PRIVATE_KEY*`, etc.) that are always rejected.
+- `deployment/environments.yml` — declares which environments are `active`, plus a `single_environment` flag for repos that intentionally use one.
+
+## Flow
+
+1. **Edit** a value with [update-config.sh](../scripts/update-config.md) — it pre-validates against the schema before writing, so a bad key never dirties the tree.
+2. **Validate** with [validate-config.mjs](../scripts/validate-config.md) — run directly, via `pnpm run env:validate`, as part of `pnpm run secrets-check`, and in CI (`.github/workflows/secret-scan.yml`).
+3. **Sync** to Vercel with `pnpm exec sync-env --env=<env>` (or `update-config.sh --sync`), which upserts each variable atomically.
+
+## Secrets
+
+Secrets are deliberately outside this YAML. They are managed by the `sync-env` binary from the `vercel-deploy-scripts` package:
+
+- `pnpm exec sync-env --env=<env>` — push current YAML values to Vercel.
+- `pnpm exec sync-env --rotate-keys --env=<env>` — rotate all secrets (Firebase + Sentry) with zero downtime.
+
+A gitleaks scan (the second half of `pnpm run secrets-check`) and the `secret-scan.yml` workflow are the backstop that keeps committed secrets out entirely.
+
+## Related
+
+- [update-config.sh](../scripts/update-config.md)
+- [validate-config.mjs](../scripts/validate-config.md)
