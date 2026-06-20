@@ -19,6 +19,7 @@
     "prepare": "husky",
     "emulator": "firebase emulators:start",
     "env:pull": "generate-local-env",
+    "docs:validate": "node scripts/validate-docs.mjs",
     "env:validate": "node scripts/validate-config.mjs",
     "secrets-check": "node scripts/validate-config.mjs && secrets-check --config .gitleaks.toml"
   },
