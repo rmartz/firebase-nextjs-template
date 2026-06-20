@@ -12,7 +12,7 @@ jobs:
   tests:
     name: Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 3
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
@@ -21,7 +21,7 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 2
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
@@ -30,7 +30,7 @@ jobs:
   typecheck:
     name: Type check
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 2
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
@@ -39,7 +39,7 @@ jobs:
   format:
     name: Format
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 2
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
@@ -48,7 +48,7 @@ jobs:
   docs:
     name: Docs (OKF)
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 2
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
@@ -57,7 +57,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 4
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
@@ -66,7 +66,7 @@ jobs:
   storybook:
     name: Storybook
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 3
     env:
       STORYBOOK_DISABLE_TELEMETRY: "1"
     steps:
