@@ -4,6 +4,10 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # Let updates age before opening a PR, reducing exposure to compromised
+    # releases (supply-chain attacks) that are typically yanked within days.
+    cooldown:
+      default-days: 7
     commit-message:
       prefix: "chore"
       include: "scope"
@@ -21,6 +25,10 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # Let updates age before opening a PR, reducing exposure to compromised
+    # releases (supply-chain attacks) that are typically yanked within days.
+    cooldown:
+      default-days: 7
     commit-message:
       prefix: "chore"
       include: "scope"
