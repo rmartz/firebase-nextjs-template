@@ -12,12 +12,21 @@ updates:
       prefix: "chore"
       include: "scope"
     groups:
+      # Group only minor and patch bumps into one PR per dependency type. Major
+      # bumps match no group and so are raised as individual PRs, isolating the
+      # updates most likely to require code changes for handling on their own.
       dev-dependencies:
         dependency-type: development
+        update-types:
+          - "minor"
+          - "patch"
         patterns:
           - "*"
       production-dependencies:
         dependency-type: production
+        update-types:
+          - "minor"
+          - "patch"
         patterns:
           - "*"
 
