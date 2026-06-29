@@ -62,7 +62,6 @@ pnpm test             # Run tests with Vitest
 pnpm tsc              # Type check
 pnpm storybook        # Start Storybook dev server (port 6006)
 pnpm build-storybook  # Build static Storybook
-pnpm run env:pull     # Pull .env.local from Vercel (replaces manual cp .env.example)
 pnpm run env:validate # Validate deployment config files against schema (also runs on every commit)
 ```
 
@@ -121,29 +120,19 @@ project-root/
 
 Public, non-secret environment config (Firebase project IDs, Sentry org/project, `NEXT_PUBLIC_*` keys) lives in `deployment/{env}.yml` and is validated against `deployment/schema.yml` on every commit and in CI. Secrets never go in these files.
 
-To update a public config value and sync it to Vercel:
+To update a public config value (writes and validates the local YAML):
 
 ```bash
 scripts/update-config.sh --env=preview NEXT_PUBLIC_FIREBASE_PROJECT_ID=my-project-id
 # or from a Firebase console JSON download:
 scripts/update-config.sh --env=preview --firebase-config=~/Downloads/firebase-config.json
-# to also push to Vercel immediately:
-scripts/update-config.sh --env=preview --firebase-config=~/Downloads/firebase-config.json --sync
-# to push current YAML values to Vercel without modifying YAML:
-pnpm exec sync-env --env=preview
 ```
+
+Pushing the updated YAML values to Vercel is handled by the `envctl` CLI (in development).
 
 ### Secret Rotation
 
-To rotate all secrets (Firebase service account, Sentry token) with zero downtime:
-
-```bash
-# Prereqs: gcloud auth login && pnpm exec vercel login
-# SENTRY_AUTH_TOKEN must be set in the shell environment when Sentry is configured
-pnpm exec sync-env --rotate-keys --env=preview
-```
-
-Creates the new credential, pushes it to Vercel, redeploys, waits for a healthy response, then decommissions the old one. No master rotation keys are stored in Vercel. Use `--init` on a fresh project to bootstrap secrets for the first time.
+Secret rotation (Firebase service account, Sentry token) is handled by the `envctl` CLI (in development).
 
 ### GitHub Actions
 

@@ -5,9 +5,9 @@
 # will be rejected by the pre-commit hook and CI.
 #
 # Sensitive variables are managed directly in Vercel and are never committed.
-# Run `pnpm env:pull` to generate a local .env.local from Vercel's stored values.
+# Generating a local .env.local from Vercel is handled by the envctl CLI (in development).
 #
-# To update these values and sync them to Vercel: scripts/update-config.sh --env=preview
+# To update these values (writes the local YAML): scripts/update-config.sh --env=preview
 
 environment: preview
 
