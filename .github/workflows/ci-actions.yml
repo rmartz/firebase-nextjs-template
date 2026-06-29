@@ -64,7 +64,7 @@ jobs:
       - run: pnpm build
 
   storybook:
-    name: Storybook
+    name: Storybook Build
     runs-on: ubuntu-latest
     timeout-minutes: 3
     env:
