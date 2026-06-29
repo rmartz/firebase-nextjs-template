@@ -21,7 +21,7 @@ pnpm run env:validate
 node scripts/validate-config.mjs --env=preview
 ```
 
-It also runs as the first half of `pnpm run secrets-check` (alongside the gitleaks scan) and in CI via `.github/workflows/secret-scan.yml`.
+It also runs on every commit via `.husky/pre-commit` and in CI via `.github/workflows/config-validate.yml`.
 
 ## How keys are checked
 
