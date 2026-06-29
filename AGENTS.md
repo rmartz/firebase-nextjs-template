@@ -11,7 +11,8 @@ pnpm dev              # Start dev server
 pnpm build            # Production build
 pnpm lint             # Lint
 pnpm format           # Format
-pnpm test             # Run tests with Vitest
+pnpm test             # Run headless tests with Vitest (node / hooks / components)
+pnpm test:storybook   # Run Storybook stories as browser tests (Chromium; needs `pnpm exec playwright install chromium`)
 pnpm tsc              # Type check
 pnpm storybook        # Start Storybook dev server (port 6006)
 pnpm build-storybook  # Build static Storybook
