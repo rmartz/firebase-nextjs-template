@@ -63,8 +63,7 @@ pnpm tsc              # Type check
 pnpm storybook        # Start Storybook dev server (port 6006)
 pnpm build-storybook  # Build static Storybook
 pnpm run env:pull     # Pull .env.local from Vercel (replaces manual cp .env.example)
-pnpm run env:validate # Validate deployment config files against schema
-pnpm run secrets-check # Run config validation + gitleaks scan (also runs on every commit)
+pnpm run env:validate # Validate deployment config files against schema (also runs on every commit)
 ```
 
 ## Project Structure
@@ -152,7 +151,7 @@ CI runs automatically on every PR with four parallel checks: tests, lint, format
 
 Additional workflows:
 
-- **Secret Scan** — Runs gitleaks and validates deployment config on every PR and push to `main`
+- **Config Validation** — Validates deployment config against the schema on every PR and push to `main`
 
 ## License
 

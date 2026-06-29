@@ -19,7 +19,7 @@ Public, non-secret environment configuration is committed to the repo as YAML un
 ## Flow
 
 1. **Edit** a value with [update-config.sh](../scripts/update-config.md) — it pre-validates against the schema before writing, so a bad key never dirties the tree.
-2. **Validate** with [validate-config.mjs](../scripts/validate-config.md) — run directly, via `pnpm run env:validate`, as part of `pnpm run secrets-check`, and in CI (`.github/workflows/secret-scan.yml`).
+2. **Validate** with [validate-config.mjs](../scripts/validate-config.md) — run directly, via `pnpm run env:validate`, on every commit via `.husky/pre-commit`, and in CI (`.github/workflows/config-validate.yml`).
 3. **Sync** to Vercel with `pnpm exec sync-env --env=<env>` (or `update-config.sh --sync`), which upserts each variable atomically.
 
 ## Secrets
@@ -29,7 +29,7 @@ Secrets are deliberately outside this YAML. They are managed by the `sync-env` b
 - `pnpm exec sync-env --env=<env>` — push current YAML values to Vercel.
 - `pnpm exec sync-env --rotate-keys --env=<env>` — rotate all secrets (Firebase + Sentry) with zero downtime.
 
-A gitleaks scan (the second half of `pnpm run secrets-check`) and the `secret-scan.yml` workflow are the backstop that keeps committed secrets out entirely.
+The schema's `denied_patterns` (the first line of defense in [validate-config.mjs](../scripts/validate-config.md)) keep secret-like keys out of the committed YAML entirely.
 
 ## Related
 
