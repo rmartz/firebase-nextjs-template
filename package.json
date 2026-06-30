@@ -33,8 +33,8 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.12.0",
-    "@sentry/nextjs": "^10.58.0",
-    "@tanstack/react-query": "^5.101.0",
+    "@sentry/nextjs": "^10.60.0",
+    "@tanstack/react-query": "^5.101.1",
     "@vercel/analytics": "^2.0.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
