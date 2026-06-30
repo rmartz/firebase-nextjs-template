@@ -19,7 +19,7 @@ node scripts/validate-pins.mjs
 pnpm run pins:validate
 ```
 
-It runs in CI as the **Pin format** job in `.github/workflows/ci-actions.yml`.
+It runs in CI as the **Pin format** job in `.github/workflows/ci-actions.yml`, gated by the `detect-changes` job to run only when `package.json` (or this validator) changes — a closed-input check needs no run otherwise.
 
 ## What it checks
 
