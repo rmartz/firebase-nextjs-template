@@ -19,17 +19,19 @@ Vercel's [Ignored Build Step](https://vercel.com/docs/projects/overview#ignored-
 
 ## How it reads the PR title
 
-It resolves the PR title from the **public** GitHub API using Vercel's system env vars (`VERCEL_GIT_PULL_REQUEST_ID`, `VERCEL_GIT_REPO_OWNER`, `VERCEL_GIT_REPO_SLUG`) — no token needed, since this repo is public. `node` parses the JSON (no `jq` dependency).
+It resolves the PR title from the **public** GitHub API using Vercel's system env vars (`VERCEL_GIT_PULL_REQUEST_ID`, `VERCEL_GIT_REPO_OWNER`, `VERCEL_GIT_REPO_SLUG`) — no token needed, since this repo is public. `node` parses the JSON (no `jq` dependency). Vercel injects `VERCEL_ENV` and the `VERCEL_GIT_*` vars into the ignore command automatically (the same vars `turbo-ignore` / `nx-ignore` rely on), so there is no env-var or secret setup.
 
 It **fails open**: if the title can't be read (rate limit, network, or no PR context — e.g. a branch push with no open PR) it builds. The gate only ever _skips_ when it has positively confirmed a non-`feat`/`fix` title, so a preview UAT needs is never wrongly cancelled.
 
-## Required one-time wiring (Vercel dashboard)
+## Wiring
 
-This script only takes effect once the project's Ignored Build Step is pointed at it — it is **not** configurable from `vercel.json`:
+Wired via `vercel.json`:
 
-> Vercel Project → **Settings → Git → Ignored Build Step → Custom** → `bash scripts/vercel-ignore-build.sh`
+```json
+{ "ignoreCommand": "bash scripts/vercel-ignore-build.sh" }
+```
 
-Until that is set, Vercel keeps building every PR as before.
+`ignoreCommand` is a first-class `vercel.json` field that **overrides** the Project Settings "Ignored Build Step" ([docs](https://vercel.com/docs/project-configuration/vercel-json#ignorecommand)) — same precedence as `buildCommand` / `installCommand`. So the gate is version-controlled, travels with every fork/clone of this template, and is **active on merge with no dashboard step**. The only thing to confirm post-merge is the first preview build log's **"Running ignore command"** step, which prints the build/skip decision.
 
 ## Requires
 

@@ -15,8 +15,10 @@
 # preview is never wrongly skipped — the gate only ever skips when it has
 # positively confirmed a non-feat/fix title.
 #
-# Wiring (one-time, in the Vercel dashboard): Project → Settings → Git →
-# "Ignored Build Step" → Custom → `bash scripts/vercel-ignore-build.sh`.
+# Wired via vercel.json's `ignoreCommand` ("bash scripts/vercel-ignore-build.sh"),
+# which overrides the Project Settings "Ignored Build Step" — so the gate is
+# version-controlled and active on merge, with no dashboard step. Vercel injects
+# VERCEL_ENV and the VERCEL_GIT_* vars used below into this command automatically.
 
 set -u
 
