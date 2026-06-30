@@ -4,6 +4,18 @@
 
 - Always use `pnpm`. Never `npm` or `yarn`.
 
+## Dependencies
+
+- **Pin full versions in `package.json`.** Every dependency specifier must name the
+  full `[major].[minor].[patch]` version, even when it carries a range operator —
+  e.g. `"prettier": "^3.8.4"`, never `"prettier": "^3"` or `"^3.8"`. A bare-major or
+  major-only-minor range lets Dependabot satisfy a bump via the lockfile alone, with
+  **no `package.json` diff**, so the update is invisible in review — exactly how a
+  Prettier minor bump can reformat the codebase and surface only as an unexplained CI
+  failure. Full pins force Dependabot to rewrite the specifier on every bump, keeping
+  dependency updates explicit in the manifest. (`github:`, `workspace:`, `file:`, and
+  `link:` specifiers are exempt — they carry no semver range.)
+
 ## Common Commands
 
 ```bash
@@ -18,6 +30,7 @@ pnpm storybook        # Start Storybook dev server (port 6006)
 pnpm build-storybook  # Build static Storybook
 pnpm screenshots      # Screenshot every story for visual review (run after build-storybook)
 pnpm run env:validate # Validate deployment config files against schema (also runs pre-commit)
+pnpm run pins:validate # Check package.json pins are full [major].[minor].[patch] versions
 ```
 
 ## Worktree Setup
