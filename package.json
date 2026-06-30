@@ -17,6 +17,7 @@
     "format:check": "prettier --check .",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
+    "screenshots": "node scripts/capture-screenshots.mjs",
     "prepare": "husky",
     "emulator": "firebase emulators:start",
     "docs:validate": "node scripts/validate-docs.mjs",
