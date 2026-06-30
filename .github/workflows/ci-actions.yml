@@ -85,6 +85,15 @@ jobs:
       - uses: ./.github/actions/setup
       - run: pnpm run docs:validate
 
+  pins:
+    name: Pin format
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - run: pnpm run pins:validate
+
   build:
     name: Build
     runs-on: ubuntu-latest
