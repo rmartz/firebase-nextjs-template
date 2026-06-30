@@ -4,6 +4,18 @@
 
 - Always use `pnpm`. Never `npm` or `yarn`.
 
+## Dependencies
+
+- **Pin full versions in `package.json`.** Every dependency specifier must name the
+  full `[major].[minor].[patch]` version, even when it carries a range operator —
+  e.g. `"prettier": "^3.8.4"`, never `"prettier": "^3"` or `"^3.8"`. A bare-major or
+  major-only-minor range lets Dependabot satisfy a bump via the lockfile alone, with
+  **no `package.json` diff**, so the update is invisible in review — exactly how a
+  Prettier minor bump can reformat the codebase and surface only as an unexplained CI
+  failure. Full pins force Dependabot to rewrite the specifier on every bump, keeping
+  dependency updates explicit in the manifest. (`github:`, `workspace:`, `file:`, and
+  `link:` specifiers are exempt — they carry no semver range.)
+
 ## Common Commands
 
 ```bash
@@ -18,6 +30,7 @@ pnpm storybook        # Start Storybook dev server (port 6006)
 pnpm build-storybook  # Build static Storybook
 pnpm screenshots      # Screenshot every story for visual review (run after build-storybook)
 pnpm run env:validate # Validate deployment config files against schema (also runs pre-commit)
+pnpm run pins:validate # Check package.json pins are full [major].[minor].[patch] versions
 ```
 
 ## Worktree Setup
@@ -59,8 +72,8 @@ Public (non-secret) environment config lives in `deployment/{env}.yml` and is va
 - **No IIFEs.** Do not use immediately-invoked function expressions. Extract the logic into a named helper function or compute the value with a plain expression instead.
 - **No function-style imports.** Do not use inline `import("…").Type` syntax in type annotations. Use module-level `import type { … } from "…"` statements at the top of the file. Dynamic `await import("…")` for services that require conditional loading (e.g., Sentry instrumentation) is acceptable.
 - **No unnecessary helpers.** Do not extract logic into a helper function unless it separates significant logic or belongs in a different module. Three similar lines is better than a premature abstraction.
-- **Enums and constant objects** should be kept in alphabetical order to minimize merge conflicts.
-- **Prefer enums over string literal unions** for any domain concept with two or more named states (e.g., use `enum Status { Active = "active", Inactive = "inactive" }` rather than `"active" | "inactive"`). String enum values must match the current serialized schema. Export new enums from the module barrel (the directory-level `index.ts` when one exists or is required by the barrel rule above).
+- **Enums, constant objects, and `as const` value arrays** should be kept in alphabetical order to minimize merge conflicts.
+- **Value sets: default to a structural string union or `as const` array over an `enum`.** For a fixed set of named values, use a union (`type Status = "active" | "inactive"`); when the values are also needed at runtime (validation, iteration) use an `as const` array and derive the type (`const STATUSES = ["active", "inactive"] as const; type Status = (typeof STATUSES)[number]`). Both stay **structural**, so values that cross a serialization boundary — Firebase documents, API payloads, query params — assign without a cast, and they emit ~no runtime. Reserve an `enum` for **internal-only** state you iterate as a unit and never serialize raw: a string `enum` is **nominal** (it rejects the underlying literal, forcing a cast at every serialization boundary) and a plain `enum` ships a runtime object (`const enum` is unavailable under `isolatedModules`). The deciding question is the serialization boundary — does the value cross a wire/persistence boundary? → structural union / `as const`; an internal-only set you iterate? → an `enum` is fine. Export new unions / `as const` arrays from the module barrel (the directory-level `index.ts` when one exists or is required by the barrel rule above).
 
 ## Naming Conventions
 
