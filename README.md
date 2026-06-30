@@ -118,6 +118,8 @@ project-root/
 2. Add all environment variables from `.env.example`
 3. Deploy — Vercel handles preview deployments on PRs and production deployments on merge to `main`
 
+**Conserve preview-deploy quota:** preview deploys are gated by `vercel.json`'s `ignoreCommand` (`bash scripts/vercel-ignore-build.sh`) — production always builds, while PR previews build only for `feat:` / `fix:` titles, skipping `chore` / `docs` / `ci` / etc. It's committed config (no dashboard step) and active on merge. See [`docs/scripts/vercel-ignore-build.md`](docs/scripts/vercel-ignore-build.md).
+
 ### Environment Configuration
 
 Public, non-secret environment config (Firebase project IDs, Sentry org/project, `NEXT_PUBLIC_*` keys) lives in `deployment/{env}.yml` and is validated against `deployment/schema.yml` on every commit and in CI. Secrets never go in these files.

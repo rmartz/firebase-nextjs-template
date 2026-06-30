@@ -38,6 +38,7 @@ tags: [deployment, config]
 - [capture-screenshots.mjs](scripts/capture-screenshots.md) — screenshot every Storybook story in Chromium for visual acceptance review.
 - [update-config.sh](scripts/update-config.md) — update public deployment config, validate it, and optionally sync to Vercel.
 - [validate-config.mjs](scripts/validate-config.md) — validate deployment config files against the schema.
+- [vercel-ignore-build.sh](scripts/vercel-ignore-build.md) — skip Vercel preview deploys for non-feat/fix PRs to conserve quota.
 - [validate-docs.mjs](scripts/validate-docs.md) — validate the OKF frontmatter on these docs pages.
 - [validate-pins.mjs](scripts/validate-pins.md) — enforce full-version pins in package.json.
 
