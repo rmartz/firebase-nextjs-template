@@ -21,7 +21,8 @@
     "prepare": "husky",
     "emulator": "firebase emulators:start",
     "docs:validate": "node scripts/validate-docs.mjs",
-    "env:validate": "node scripts/validate-config.mjs"
+    "env:validate": "node scripts/validate-config.mjs",
+    "pins:validate": "node scripts/validate-pins.mjs"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
