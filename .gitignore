@@ -11,3 +11,6 @@ tsconfig.tsbuildinfo
 storybook-static
 next-env.d.ts
 .git-worktrees/
+
+# Storybook screenshot capture output
+screenshots/

@@ -16,6 +16,7 @@ pnpm test:storybook   # Run Storybook stories as browser tests (Chromium; needs 
 pnpm tsc              # Type check
 pnpm storybook        # Start Storybook dev server (port 6006)
 pnpm build-storybook  # Build static Storybook
+pnpm screenshots      # Screenshot every story for visual review (run after build-storybook)
 pnpm run env:validate # Validate deployment config files against schema (also runs pre-commit)
 ```
 

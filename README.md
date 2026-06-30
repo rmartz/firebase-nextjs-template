@@ -63,6 +63,7 @@ pnpm test:storybook   # Run Storybook stories as browser tests (Chromium via Pla
 pnpm tsc              # Type check
 pnpm storybook        # Start Storybook dev server (port 6006)
 pnpm build-storybook  # Build static Storybook
+pnpm screenshots      # Screenshot every story for visual review (run after build-storybook)
 pnpm run env:validate # Validate deployment config files against schema (also runs on every commit)
 ```
 
@@ -137,11 +138,12 @@ Secret rotation (Firebase service account, Sentry token) is handled by the `envc
 
 ### GitHub Actions
 
-CI runs automatically on every PR with four parallel checks: tests, lint, format, and build. See [`.github/workflows/ci-actions.yml`](.github/workflows/ci-actions.yml).
+CI runs automatically on every PR as parallel jobs in [`.github/workflows/ci-actions.yml`](.github/workflows/ci-actions.yml): Tests, Lint, Format, Type check, Docs (OKF), Build, and **Storybook Tests** (stories run as browser tests in Chromium). A **Storybook Screenshots** job additionally runs when a `*.stories.tsx` file changes — it captures a screenshot of every story and uploads them as a workflow artifact for visual review. It is advisory (`continue-on-error`), so it never blocks merge; download the `storybook-screenshots` artifact from the run to review.
 
 Additional workflows:
 
 - **Config Validation** — Validates deployment config against the schema on every PR and push to `main`
+- **File Length** / **PR Title Lint** — enforce the file-size cap and Conventional-Commits PR titles
 
 ## License
 
