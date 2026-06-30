@@ -12,11 +12,13 @@ updates:
       prefix: "chore"
       include: "scope"
     groups:
-      # Prettier (and its plugins) drive formatting output, so even a minor bump
-      # can reformat the codebase and fail the Format check with no other visible
-      # cause. Isolate it into its own PR — listed first to win group-assignment
-      # precedence — covering every bump type so a Prettier update is always
-      # reviewed on its own, never bundled with the dev-dependencies group.
+      # Prettier (and its plugins) drive formatting output, so a major or minor
+      # bump can reformat the codebase and fail the Format check with no other
+      # visible cause. Split those into their own PR — listed first to win
+      # group-assignment precedence — for isolated review. Patch bumps are
+      # trivial enough to ride along with the dev-dependencies group: omitting
+      # "patch" here means a Prettier patch does not match this group and falls
+      # through to dev-dependencies (minor/patch) below.
       prettier:
         patterns:
           - "prettier"
@@ -24,7 +26,6 @@ updates:
         update-types:
           - "major"
           - "minor"
-          - "patch"
       # Group only minor and patch bumps into one PR per dependency type. Major
       # bumps match no group and so are raised as individual PRs, isolating the
       # updates most likely to require code changes for handling on their own.
