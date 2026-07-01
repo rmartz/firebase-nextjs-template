@@ -53,8 +53,12 @@ jobs:
           # Documentation denylist: run the heavy jobs by default, skip only when
           # EVERY changed file is provably-inert docs (.md / .txt / LICENSE). A new
           # or unanticipated file type fails safe (runs the suite) rather than open.
+          # Guard: public/ assets (e.g. robots.txt) are never inert — they affect
+          # production output regardless of extension, so short-circuit before the
+          # denylist has a chance to match their .txt suffix.
           doc_regex='(^|/)LICENSE$|\.(md|txt)$'
-          if printf '%s\n' "$changed" | grep -Ev "$doc_regex" | grep -q .; then
+          if printf '%s\n' "$changed" | grep -Eq '^public/' || \
+             printf '%s\n' "$changed" | grep -Ev "$doc_regex" | grep -q .; then
             code_changed=true
           else
             code_changed=false
