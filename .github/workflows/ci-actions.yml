@@ -16,6 +16,7 @@ jobs:
     outputs:
       stories_changed: ${{ steps.classify.outputs.stories_changed }}
       package_changed: ${{ steps.classify.outputs.package_changed }}
+      code_changed: ${{ steps.classify.outputs.code_changed }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -26,6 +27,7 @@ jobs:
           if [ "${{ github.event_name }}" != "pull_request" ]; then
             echo "stories_changed=true" >> "$GITHUB_OUTPUT"
             echo "package_changed=true" >> "$GITHUB_OUTPUT"
+            echo "code_changed=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           base="${{ github.event.pull_request.base.sha }}"
@@ -48,10 +50,26 @@ jobs:
             package_changed=false
           fi
           echo "package_changed=$package_changed" >> "$GITHUB_OUTPUT"
-          printf 'Resolved: stories_changed=%s package_changed=%s\n' "$stories_changed" "$package_changed"
+          # Documentation denylist: run the heavy jobs by default, skip only when
+          # EVERY changed file is provably-inert docs (.md / .txt / LICENSE). A new
+          # or unanticipated file type fails safe (runs the suite) rather than open.
+          # Guard: public/ assets (e.g. robots.txt) are never inert — they affect
+          # production output regardless of extension, so short-circuit before the
+          # denylist has a chance to match their .txt suffix.
+          doc_regex='(^|/)LICENSE$|\.(md|txt)$'
+          if printf '%s\n' "$changed" | grep -Eq '^public/' || \
+             printf '%s\n' "$changed" | grep -Ev "$doc_regex" | grep -q .; then
+            code_changed=true
+          else
+            code_changed=false
+          fi
+          echo "code_changed=$code_changed" >> "$GITHUB_OUTPUT"
+          printf 'Resolved: stories_changed=%s package_changed=%s code_changed=%s\n' "$stories_changed" "$package_changed" "$code_changed"
 
   tests:
     name: Tests
+    needs: detect-changes
+    if: needs.detect-changes.outputs.code_changed == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
@@ -70,6 +88,8 @@ jobs:
 
   typecheck:
     name: Type check
+    needs: detect-changes
+    if: needs.detect-changes.outputs.code_changed == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
@@ -110,6 +130,8 @@ jobs:
 
   build:
     name: Build
+    needs: detect-changes
+    if: needs.detect-changes.outputs.code_changed == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 4
     steps:
@@ -165,6 +187,8 @@ jobs:
   # install is retried to absorb transient apt/CDN failures.
   storybook-tests:
     name: Storybook Tests
+    needs: detect-changes
+    if: needs.detect-changes.outputs.code_changed == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 8
     env:
