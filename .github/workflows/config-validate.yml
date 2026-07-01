@@ -1,9 +1,17 @@
 name: Config Validation
 
+# Closed-input check: the result depends only on the deployment config and its
+# validator, so run it only when one of those changes.
 on:
   pull_request:
+    paths:
+      - "deployment/**"
+      - "scripts/validate-config.mjs"
   push:
     branches: [main]
+    paths:
+      - "deployment/**"
+      - "scripts/validate-config.mjs"
 
 permissions:
   contents: read
