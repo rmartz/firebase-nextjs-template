@@ -156,19 +156,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
-      - name: Install Playwright Chromium
-        # Retry: `--with-deps` runs apt-get, which can fail on a transient runner
-        # repo hiccup; scope the retry to this known-flaky install step only.
-        run: |
-          for attempt in 1 2 3; do
-            if pnpm exec playwright install --with-deps chromium; then
-              exit 0
-            fi
-            echo "Playwright install attempt $attempt failed; retrying in 15s..." >&2
-            sleep 15
-          done
-          echo "Playwright install failed after 3 attempts." >&2
-          exit 1
+      - uses: ./.github/actions/playwright-chromium
       - name: Build Storybook
         run: pnpm build-storybook
       - name: Capture screenshots
@@ -196,15 +184,5 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
-      - name: Install Playwright Chromium
-        run: |
-          for i in 1 2 3; do
-            if pnpm exec playwright install --with-deps chromium; then
-              exit 0
-            fi
-            echo "playwright install attempt $i failed; retrying in 10s..." >&2
-            sleep 10
-          done
-          echo "playwright install failed after 3 attempts" >&2
-          exit 1
+      - uses: ./.github/actions/playwright-chromium
       - run: pnpm test:storybook
