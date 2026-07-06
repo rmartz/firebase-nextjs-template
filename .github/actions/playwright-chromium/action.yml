@@ -4,23 +4,32 @@ description: "Cache-restore and install Chromium for Playwright, with a retry. R
 runs:
   using: "composite"
   steps:
-    - id: version
-      shell: bash
-      run: echo "version=$(pnpm exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
-    - uses: actions/cache@v4
+    - id: cache
+      uses: actions/cache@v4
       with:
         path: ~/.cache/ms-playwright
-        key: playwright-chromium-${{ runner.os }}-${{ steps.version.outputs.version }}
+        # Key on the lockfile hash (busts whenever any dependency — including
+        # playwright — changes) with a coarse os-scoped restore-key for partial
+        # reuse: on a bump the previous browser cache is restored and only a
+        # changed browser re-downloads. The `-chromium-` prefix scopes the key
+        # to this browser set so a job installing a different set cannot collide.
+        key: playwright-chromium-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+        restore-keys: |
+          playwright-chromium-${{ runner.os }}-
     - name: Install Chromium
       shell: bash
-      # Retry: `--with-deps` runs apt-get, which can fail on a transient runner
-      # repo hiccup; scope the retry to this known-flaky install step. On a warm
-      # cache the ~130MB Chromium download is skipped (already in ~/.cache/
-      # ms-playwright); the apt system-deps step still runs (not cacheable) but
-      # is fast.
+      # On an exact cache hit the ~130MB browser is already restored, so install
+      # only the OS libraries (`install-deps`) and skip the download attempt;
+      # otherwise do the full browser install. Either path shells apt and can hit
+      # a transient runner/CDN hiccup, so scope a 3x retry around it.
       run: |
+        if [ "${{ steps.cache.outputs.cache-hit }}" = "true" ]; then
+          install="pnpm exec playwright install-deps chromium"
+        else
+          install="pnpm exec playwright install --with-deps chromium"
+        fi
         for attempt in 1 2 3; do
-          if pnpm exec playwright install --with-deps chromium; then
+          if $install; then
             exit 0
           fi
           echo "Playwright install attempt $attempt failed; retrying in 15s..." >&2
