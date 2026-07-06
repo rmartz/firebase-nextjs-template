@@ -21,6 +21,8 @@ The script serves `storybook-static/` over a local HTTP server (static Storybook
 
 Stories are captured **concurrently** (a pool of 4 pages) with a short per-story render budget (`domcontentloaded` navigation + a visibility wait), and the whole run is bounded by a **wall-clock deadline** (default 4 min, override with `CAPTURE_DEADLINE_MS`). On the deadline the script exits non-zero after any in-flight captures finish rather than running on.
 
+The render-ready wait accepts either a visible `#storybook-root > *` **or** a visible `[role="dialog"]` / `[role="alertdialog"]` overlay. ShadCN/Radix `Dialog` and `AlertDialog` render their content into a portal on `document.body` (outside `#storybook-root`), so an open-overlay story leaves the root empty; without the overlay signal such stories would time out. `page.screenshot()` shoots the whole viewport, so the portal content is included.
+
 ## CI
 
 The **Storybook Screenshots** job in `.github/workflows/ci-actions.yml` runs this on PRs, but only when a `*.stories.tsx` file changed (gated by the `detect-changes` job). The job is **advisory** — its `continue-on-error` is at the **job level**, so a failure is non-blocking for the run — but the capture step itself has **no** `continue-on-error`, so a capture failure surfaces as a job **`failure`**. That matters: a job that runs to `timeout-minutes` is **cancelled**, which the PR coordinator escalates to a human; a fast non-zero exit is a **`failure`**, which is auto-routed to fix-review where an agent can fix a broken or slow story. The in-script deadline (below the job's `timeout-minutes`) is what keeps failures fast instead of turning into cancellations.
