@@ -105,11 +105,7 @@ export default tseslint.config(
   // Test files (and shared fixtures under a `*-tests/` dir) get the higher cap.
   // Listed after the base block so it wins for these files (last match wins).
   {
-    files: [
-      "**/*.spec.{ts,tsx}",
-      "**/*.test.{ts,tsx}",
-      "**/*-tests/**/*.{ts,tsx}",
-    ],
+    files: ["**/*.spec.{ts,tsx}", "**/*-tests/**/*.{ts,tsx}"],
     rules: {
       "max-lines": [
         "error",
