@@ -89,4 +89,32 @@ export default tseslint.config(
     },
   },
   ...storybook.configs["flat/recommended"],
+  // File-length hard cap (replaces the file-length.yml CI job +
+  // scripts/check-file-length.sh). Enforced in-editor and via `pnpm lint` (the
+  // Lint CI job). Source 400, tests 600 — 2x the recommended ~200/~300 split-at
+  // targets in AGENTS.md. Counts every line (blank + comment).
+  {
+    files: ["**/*.{ts,tsx}"],
+    rules: {
+      "max-lines": [
+        "error",
+        { max: 400, skipBlankLines: false, skipComments: false },
+      ],
+    },
+  },
+  // Test files (and shared fixtures under a `*-tests/` dir) get the higher cap.
+  // Listed after the base block so it wins for these files (last match wins).
+  {
+    files: [
+      "**/*.spec.{ts,tsx}",
+      "**/*.test.{ts,tsx}",
+      "**/*-tests/**/*.{ts,tsx}",
+    ],
+    rules: {
+      "max-lines": [
+        "error",
+        { max: 600, skipBlankLines: false, skipComments: false },
+      ],
+    },
+  },
 );
