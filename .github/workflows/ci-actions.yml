@@ -180,7 +180,13 @@ jobs:
       - name: Build Storybook
         run: pnpm build-storybook
       - name: Capture screenshots
-        continue-on-error: true
+        # No step-level continue-on-error: a capture failure (a broken or slow
+        # story) must surface as a job *failure* so the coordinator routes it to
+        # fix-review. The script fails fast — stories run concurrently with a
+        # short per-story render budget and an overall wall-clock deadline below
+        # this job's timeout-minutes — so the job never hits its timeout and gets
+        # *cancelled* (which escalates to a human instead). The job-level
+        # continue-on-error above still keeps the failure non-blocking for the run.
         run: node scripts/capture-screenshots.mjs
       - name: Upload screenshots
         if: always()
