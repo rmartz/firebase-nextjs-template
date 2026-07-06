@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Block commits that introduce merge-conflict markers. Shared by the Husky hook
 # (human commits) and claude/hooks/pre-commit (agent commits in worktrees) via
-# --staged, mirroring the shared-script pattern of check-file-length.sh.
+# --staged.
 #
 # Detection: a file is flagged only when it contains an unambiguous *angle*
 # marker — a line starting with seven "<" or seven ">" (<<<<<<< HEAD,
