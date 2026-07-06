@@ -139,6 +139,26 @@ jobs:
       - uses: ./.github/actions/setup
       - run: pnpm build
 
+  # Gating compile check for the production Storybook bundle. This is a distinct
+  # render surface from both the Next.js `build` job (different entrypoint and
+  # bundler) and the Vitest-based `storybook-tests` job (which renders stories
+  # through the addon-vitest transform and never runs `storybook build`). It is
+  # gated on the broad `code_changed` denylist — not `stories_changed` — so a
+  # `.storybook/` preset, preview decorator, or addon change that breaks the
+  # bundle is caught even when no `.stories.` file changed.
+  storybook-build:
+    name: Storybook Build
+    needs: detect-changes
+    if: needs.detect-changes.outputs.code_changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    env:
+      STORYBOOK_DISABLE_TELEMETRY: "1"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - run: pnpm build-storybook
+
   # Advisory visual-acceptance aid: captures a screenshot of every story and
   # uploads them as an artifact. Runs only when a story changed (an intended
   # visual change worth eyeballing); `continue-on-error` keeps it non-blocking.
