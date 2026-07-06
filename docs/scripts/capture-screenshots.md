@@ -19,7 +19,7 @@ pnpm screenshots            # capture screenshots into screenshots/
 
 The script serves `storybook-static/` over a local HTTP server (static Storybook needs HTTP, not `file://`), visits each story's `iframe.html`, and screenshots `#storybook-root`. It does **not** build Storybook — build first.
 
-Stories are captured **concurrently** (a pool of 4 pages) with a short per-story render budget (`domcontentloaded` navigation + a visibility wait), and the whole run is bounded by a **wall-clock deadline** (default 4 min, override with `CAPTURE_DEADLINE_MS`). On the deadline the script exits non-zero immediately rather than running on.
+Stories are captured **concurrently** (a pool of 4 pages) with a short per-story render budget (`domcontentloaded` navigation + a visibility wait), and the whole run is bounded by a **wall-clock deadline** (default 4 min, override with `CAPTURE_DEADLINE_MS`). On the deadline the script exits non-zero after any in-flight captures finish rather than running on.
 
 ## CI
 

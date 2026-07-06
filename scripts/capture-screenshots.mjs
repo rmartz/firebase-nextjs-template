@@ -13,7 +13,7 @@
  * Fail-fast, not time-out: each story gets a short render budget, stories are
  * captured concurrently, and the whole run has a wall-clock deadline (below the
  * CI job's `timeout-minutes`). On the deadline the script exits non-zero
- * immediately. This matters because a job that hits `timeout-minutes` is
+ * after any in-flight captures finish. This matters because a job that hits `timeout-minutes` is
  * *cancelled* (which the PR coordinator escalates to a human), whereas a
  * non-zero exit is a *failure* (auto-routed to fix-review). We want the latter.
  *
@@ -37,7 +37,17 @@ const indexPath = join(staticDir, "index.json");
 const CONCURRENCY = 4;
 const NAV_TIMEOUT_MS = 15000;
 const RENDER_TIMEOUT_MS = 4000;
-const DEADLINE_MS = Number(process.env.CAPTURE_DEADLINE_MS ?? 4 * 60 * 1000);
+const rawDeadline = process.env.CAPTURE_DEADLINE_MS;
+if (rawDeadline) {
+  const parsed = Number(rawDeadline);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    console.error(
+      `error: CAPTURE_DEADLINE_MS must be a positive number, got "${rawDeadline}"`,
+    );
+    process.exit(1);
+  }
+}
+const DEADLINE_MS = rawDeadline ? Number(rawDeadline) : 4 * 60 * 1000;
 
 if (!existsSync(indexPath)) {
   console.error(
