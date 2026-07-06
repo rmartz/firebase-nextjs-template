@@ -2,7 +2,9 @@
 # Pre-commit guards for agent commits in git worktrees.
 # Installed via core.hooksPath=claude/hooks by new-worktree.py when this file is present.
 # lint-staged is omitted — PostToolUse Prettier/ESLint hooks already run on every edit.
+# The file-length hard cap is now the eslint `max-lines` rule, so it is caught by
+# that PostToolUse ESLint pass and by `pnpm lint` in pre-push-verify — no separate
+# length check here.
 set -e
 bash scripts/check-conflict-markers.sh --staged
 pnpm run env:validate
-bash scripts/check-file-length.sh --staged

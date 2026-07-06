@@ -140,12 +140,12 @@ Secret rotation (Firebase service account, Sentry token) is handled by the `envc
 
 ### GitHub Actions
 
-CI runs automatically on every PR as parallel jobs in [`.github/workflows/ci-actions.yml`](.github/workflows/ci-actions.yml): Tests, Lint, Format, Type check, Docs (OKF), Build, and **Storybook Tests** (stories run as browser tests in Chromium). A **Storybook Screenshots** job additionally runs when a `*.stories.tsx` file changes — it captures a screenshot of every story and uploads them as a workflow artifact for visual review. It is advisory (`continue-on-error`), so it never blocks merge; download the `storybook-screenshots` artifact from the run to review.
+CI runs automatically on every PR as parallel jobs in [`.github/workflows/ci-actions.yml`](.github/workflows/ci-actions.yml): Tests, Lint (which also enforces the file-length hard cap via the eslint `max-lines` rule), Format, Type check, Docs (OKF), Build, and **Storybook Tests** (stories run as browser tests in Chromium). A **Storybook Screenshots** job additionally runs when a `*.stories.tsx` file changes — it captures a screenshot of every story and uploads them as a workflow artifact for visual review. It is advisory (`continue-on-error`), so it never blocks merge; download the `storybook-screenshots` artifact from the run to review.
 
 Additional workflows:
 
 - **Config Validation** — Validates deployment config against the schema on every PR and push to `main`
-- **File Length** / **PR Title Lint** — enforce the file-size cap and Conventional-Commits PR titles
+- **PR Title Lint** — enforces Conventional-Commits PR titles
 
 ## License
 
