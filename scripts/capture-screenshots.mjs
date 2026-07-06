@@ -137,10 +137,10 @@ async function worker() {
         waitUntil: "domcontentloaded",
         timeout: NAV_TIMEOUT_MS,
       });
-      await page
-        .locator(RENDER_READY_SELECTOR)
-        .first()
-        .waitFor({ state: "visible", timeout: RENDER_TIMEOUT_MS });
+      await page.waitForSelector(RENDER_READY_SELECTOR, {
+        state: "visible",
+        timeout: RENDER_TIMEOUT_MS,
+      });
       await page.screenshot({ path: join(outDir, `${story.id}.png`) });
       captured += 1;
     } catch (error) {
