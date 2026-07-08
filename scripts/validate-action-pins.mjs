@@ -2,7 +2,7 @@
 /**
  * Enforces SHA-pinning for third-party GitHub Actions — the supply-chain
  * analogue of the full-version package.json pin rule. Every *remote* `uses:`
- * reference in .github/workflows/*.yml and .github/actions/  action.yml must pin
+ * reference in .github/workflows/*.yml and .github/actions/*\/action.yml must pin
  * a full 40-char commit SHA with a trailing version comment, e.g.
  *
  *   uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
