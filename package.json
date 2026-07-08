@@ -20,6 +20,7 @@
     "screenshots": "node scripts/capture-screenshots.mjs",
     "prepare": "husky",
     "emulator": "firebase emulators:start",
+    "actions:validate": "node scripts/validate-action-pins.mjs",
     "docs:validate": "node scripts/validate-docs.mjs",
     "env:validate": "node scripts/validate-config.mjs",
     "pins:validate": "node scripts/validate-pins.mjs"

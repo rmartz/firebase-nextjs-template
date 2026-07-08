@@ -41,6 +41,7 @@ tags: [deployment, config]
 - [vercel-ignore-build.sh](scripts/vercel-ignore-build.md) — skip Vercel preview deploys for non-feat/fix PRs to conserve quota.
 - [validate-docs.mjs](scripts/validate-docs.md) — validate the OKF frontmatter on these docs pages.
 - [validate-pins.mjs](scripts/validate-pins.md) — enforce full-version pins in package.json.
+- [validate-action-pins.mjs](scripts/validate-action-pins.md) — enforce commit-SHA pins on GitHub Actions.
 
 ### Subsystems
 
