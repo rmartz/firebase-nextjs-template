@@ -16,6 +16,16 @@
   dependency updates explicit in the manifest. (`github:`, `workspace:`, `file:`, and
   `link:` specifiers are exempt — they carry no semver range.)
 
+- **Pin GitHub Actions to a commit SHA.** Every third-party action in
+  `.github/workflows/*.yml` and `.github/actions/*/action.yml` must pin the full
+  40-char commit SHA with the version in a trailing comment — e.g.
+  `uses: actions/checkout@9c091bb… # v7.0.0`, never `@v7`. A mutable tag can be
+  silently repointed at attacker-controlled code that CI would then run with the
+  workflow token; a SHA is immutable. The `# <version>` comment is Dependabot's
+  convention — it reads the version there and bumps the SHA and comment together.
+  Local composite refs (`./.github/actions/*`) are in-repo and exempt. Enforced by
+  `pnpm run actions:validate` (the **Action pins** CI job).
+
 ## Common Commands
 
 ```bash
@@ -31,6 +41,7 @@ pnpm build-storybook  # Build static Storybook
 pnpm screenshots      # Screenshot every story for visual review (run after build-storybook)
 pnpm run env:validate # Validate deployment config files against schema (also runs pre-commit)
 pnpm run pins:validate # Check package.json pins are full [major].[minor].[patch] versions
+pnpm run actions:validate # Check GitHub Actions are pinned to commit SHAs
 ```
 
 ## Worktree Setup

@@ -16,6 +16,7 @@ jobs:
     outputs:
       stories_changed: ${{ steps.classify.outputs.stories_changed }}
       package_changed: ${{ steps.classify.outputs.package_changed }}
+      workflows_changed: ${{ steps.classify.outputs.workflows_changed }}
       code_changed: ${{ steps.classify.outputs.code_changed }}
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -50,6 +51,14 @@ jobs:
             package_changed=false
           fi
           echo "package_changed=$package_changed" >> "$GITHUB_OUTPUT"
+          # The action-pin check reads only workflow / composite-action YAML
+          # (plus its own validator), so it need only run when one of those changes.
+          if printf '%s\n' "$changed" | grep -Eq '^\.github/(workflows|actions)/|^scripts/validate-action-pins\.mjs$'; then
+            workflows_changed=true
+          else
+            workflows_changed=false
+          fi
+          echo "workflows_changed=$workflows_changed" >> "$GITHUB_OUTPUT"
           # Documentation denylist: run the heavy jobs by default, skip only when
           # EVERY changed file is provably-inert docs (.md / .txt / LICENSE). A new
           # or unanticipated file type fails safe (runs the suite) rather than open.
@@ -64,7 +73,7 @@ jobs:
             code_changed=false
           fi
           echo "code_changed=$code_changed" >> "$GITHUB_OUTPUT"
-          printf 'Resolved: stories_changed=%s package_changed=%s code_changed=%s\n' "$stories_changed" "$package_changed" "$code_changed"
+          printf 'Resolved: stories_changed=%s package_changed=%s workflows_changed=%s code_changed=%s\n' "$stories_changed" "$package_changed" "$workflows_changed" "$code_changed"
 
   tests:
     name: Tests
@@ -127,6 +136,20 @@ jobs:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - uses: ./.github/actions/setup
       - run: pnpm run pins:validate
+
+  # Closed-input check: only workflow / composite-action YAML (and the validator
+  # itself) can affect the result, so gate it on those changing. Enforces that
+  # every remote action stays pinned to a commit SHA (supply-chain hardening).
+  action-pins:
+    name: Action pins
+    needs: detect-changes
+    if: needs.detect-changes.outputs.workflows_changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: ./.github/actions/setup
+      - run: pnpm run actions:validate
 
   build:
     name: Build
