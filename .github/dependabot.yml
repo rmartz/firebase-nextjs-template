@@ -12,6 +12,52 @@ updates:
       prefix: "chore"
       include: "scope"
     groups:
+      # Version-locked families. Each of these is a set of packages that ship on
+      # a shared version line (or whose majors are dictated by one member), so a
+      # bump to one that is not matched by a bump to the rest breaks the build.
+      # They are grouped across ALL update types — major, minor, AND patch — and
+      # listed first to win group-assignment precedence, so any bump within a
+      # family lands as one atomic PR. (Update-types are deliberately unrestricted
+      # here: a react patch without react-dom is as broken as a major, and the
+      # prod/dev split would otherwise scatter react/react-dom from their @types.)
+      react:
+        # react + react-dom ship the same version and must move together; the
+        # @types track react's major. Spans prod (react, react-dom) and dev (types).
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
+      storybook:
+        # Every @storybook/* package, the storybook CLI, and the eslint plugin
+        # share one Storybook version line — a Storybook major must move them all.
+        patterns:
+          - "storybook"
+          - "@storybook/*"
+          - "eslint-plugin-storybook"
+      vite:
+        # vite + its react plugin + vitest + @vitest/* are one interlocked
+        # toolchain: a vite major dictates the plugin and vitest majors (the
+        # @vitejs/plugin-react 6 -> vite 8 coupling), so bump them together.
+        patterns:
+          - "vite"
+          - "@vitejs/*"
+          - "vitest"
+          - "@vitest/*"
+      eslint:
+        # eslint + @eslint/js share a version line; typescript-eslint and the
+        # react-hooks plugin track the eslint major.
+        patterns:
+          - "eslint"
+          - "@eslint/js"
+          - "typescript-eslint"
+          - "eslint-plugin-react-hooks"
+      tailwind:
+        # tailwindcss core + its postcss plugin ship in lockstep (both moved
+        # 4.3.1 -> 4.3.2 together); a mismatch fails the build.
+        patterns:
+          - "tailwindcss"
+          - "@tailwindcss/*"
       # Prettier (and its plugins) drive formatting output, so a major or minor
       # bump can reformat the codebase and fail the Format check with no other
       # visible cause. Split those into their own PR — listed first to win
