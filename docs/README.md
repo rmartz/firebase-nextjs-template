@@ -42,6 +42,7 @@ tags: [deployment, config]
 - [validate-docs.mjs](scripts/validate-docs.md) — validate the OKF frontmatter on these docs pages.
 - [validate-pins.mjs](scripts/validate-pins.md) — enforce full-version pins in package.json.
 - [validate-action-pins.mjs](scripts/validate-action-pins.md) — enforce commit-SHA pins on GitHub Actions.
+- [validate-anchor-uniqueness.mjs](scripts/validate-anchor-uniqueness.md) — report per-file edit fragility (anchor uniqueness); POC for the agent-legibility epic.
 
 ### Subsystems
 

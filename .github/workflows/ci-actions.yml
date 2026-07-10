@@ -125,6 +125,26 @@ jobs:
       - uses: ./.github/actions/setup
       - run: pnpm run docs:validate
 
+  # Agent-legibility metrics (epic #161). REPORT-ONLY: this job always passes; it
+  # prints the edit-fragility (anchor-uniqueness) table to the log and the PR's
+  # check summary so we can watch the distribution and calibrate a threshold
+  # before any of these becomes a gate. Seed of the "Codebase health" harness (#167).
+  codebase-health:
+    name: Codebase health (report-only)
+    needs: detect-changes
+    if: needs.detect-changes.outputs.code_changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: ./.github/actions/setup
+      - name: Edit-fragility report
+        run: |
+          echo '### Edit-fragility (anchor-uniqueness) — report-only' >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          pnpm run --silent fragility:report | tee -a "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
   # Closed-input check: only package.json (and the validator itself) can affect
   # the result, so gate it on those changing rather than running every PR.
   pins:
