@@ -12,17 +12,27 @@ updates:
       prefix: "chore"
       include: "scope"
     groups:
-      # Version-locked families. Each of these is a set of packages that ship on
-      # a shared version line (or whose majors are dictated by one member), so a
-      # bump to one that is not matched by a bump to the rest breaks the build.
-      # They are grouped across ALL update types — major, minor, AND patch — and
-      # listed first to win group-assignment precedence, so any bump within a
-      # family lands as one atomic PR. (Update-types are deliberately unrestricted
-      # here: a react patch without react-dom is as broken as a major, and the
-      # prod/dev split would otherwise scatter react/react-dom from their @types.)
+      # Version-locked families. Each is a set of packages that ship on a shared
+      # version line (or whose majors are dictated by one member), so a bump to
+      # one that is not matched by the rest breaks the build. Listed first to win
+      # group-assignment precedence.
+      #
+      # Scope of update-types differs by whether the family crosses the dev/prod
+      # boundary:
+      #  - An all-dev or all-prod family only needs a group for MAJOR bumps. Its
+      #    minor/patch bumps are already lockstep because every member falls into
+      #    the same catch-all group (dev-dependencies or production-dependencies),
+      #    so they batch into that one PR. MAJOR is the only bump type those
+      #    catch-alls exclude (majors are ungrouped -> individual PRs), so it is
+      #    the only case that would split a same-category family apart. Restricting
+      #    these to `major` keeps their routine minor/patch bumps in the shared
+      #    batch PR instead of spawning a dedicated family PR every release.
+      #  - A family that spans prod AND dev (react) needs ALL update types: its
+      #    minor/patch would otherwise scatter react/react-dom (prod) from their
+      #    @types (dev) across the two catch-all PRs, breaking lockstep.
       react:
-        # react + react-dom ship the same version and must move together; the
-        # @types track react's major. Spans prod (react, react-dom) and dev (types).
+        # Spans prod (react, react-dom) and dev (@types) -> all update types, so
+        # react/react-dom never drift from their @types across the prod/dev split.
         patterns:
           - "react"
           - "react-dom"
@@ -35,6 +45,8 @@ updates:
           - "storybook"
           - "@storybook/*"
           - "eslint-plugin-storybook"
+        update-types:
+          - "major"
       vite:
         # vite + its react plugin + vitest + @vitest/* are one interlocked
         # toolchain: a vite major dictates the plugin and vitest majors (the
@@ -44,6 +56,8 @@ updates:
           - "@vitejs/*"
           - "vitest"
           - "@vitest/*"
+        update-types:
+          - "major"
       eslint:
         # eslint + @eslint/js share a version line; typescript-eslint and the
         # react-hooks plugin track the eslint major.
@@ -52,12 +66,31 @@ updates:
           - "@eslint/js"
           - "typescript-eslint"
           - "eslint-plugin-react-hooks"
+        update-types:
+          - "major"
       tailwind:
         # tailwindcss core + its postcss plugin ship in lockstep (both moved
         # 4.3.1 -> 4.3.2 together); a mismatch fails the build.
         patterns:
           - "tailwindcss"
           - "@tailwindcss/*"
+        update-types:
+          - "major"
+      # TypeScript is the language/compiler itself, not a runtime library. A
+      # major or minor bump can change type-checking behavior across the whole
+      # codebase (new errors, changed inference) — a more significant, more
+      # review-worthy change than a routine dependency bump — so split it into
+      # its own PR for visibility rather than batching it with dev-dependencies.
+      # Patch bumps are low-risk and ride the dev-dependencies group (omitting
+      # "patch" here lets a TypeScript patch fall through to that batch, exactly
+      # like the Prettier group below). The exact "typescript" pattern does not
+      # match "typescript-eslint" (that stays in the eslint group).
+      typescript:
+        patterns:
+          - "typescript"
+        update-types:
+          - "major"
+          - "minor"
       # Prettier (and its plugins) drive formatting output, so a major or minor
       # bump can reformat the codebase and fail the Format check with no other
       # visible cause. Split those into their own PR — listed first to win
