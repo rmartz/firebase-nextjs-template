@@ -76,6 +76,21 @@ updates:
           - "@tailwindcss/*"
         update-types:
           - "major"
+      # TypeScript is the language/compiler itself, not a runtime library. A
+      # major or minor bump can change type-checking behavior across the whole
+      # codebase (new errors, changed inference) — a more significant, more
+      # review-worthy change than a routine dependency bump — so split it into
+      # its own PR for visibility rather than batching it with dev-dependencies.
+      # Patch bumps are low-risk and ride the dev-dependencies group (omitting
+      # "patch" here lets a TypeScript patch fall through to that batch, exactly
+      # like the Prettier group below). The exact "typescript" pattern does not
+      # match "typescript-eslint" (that stays in the eslint group).
+      typescript:
+        patterns:
+          - "typescript"
+        update-types:
+          - "major"
+          - "minor"
       # Prettier (and its plugins) drive formatting output, so a major or minor
       # bump can reformat the codebase and fail the Format check with no other
       # visible cause. Split those into their own PR — listed first to win
