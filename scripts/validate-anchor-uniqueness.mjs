@@ -44,8 +44,19 @@ const value = (name, fallback) => {
 };
 const asJson = flag("--json");
 const topN = Number(value("--top", "3"));
+if (isNaN(topN)) {
+  console.error(`--top must be a number, got: ${value("--top", "3")}`);
+  process.exit(1);
+}
 const maxRaw = value("--max", undefined);
 const maxFragility = maxRaw === undefined ? undefined : Number(maxRaw);
+if (
+  maxFragility !== undefined &&
+  (isNaN(maxFragility) || maxFragility < 0 || maxFragility > 1)
+) {
+  console.error(`--max must be a number in [0, 1], got: ${maxRaw}`);
+  process.exit(1);
+}
 
 function* walk(dir) {
   let entries;
