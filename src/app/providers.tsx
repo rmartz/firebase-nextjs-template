@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Provider } from "react-redux";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { store } from "@/store";
-import { AuthProvider } from "@/components/auth/AuthProvider";
+import { AuthProvider } from "@/auth";
 
 interface ProvidersProps {
   children: React.ReactNode;
