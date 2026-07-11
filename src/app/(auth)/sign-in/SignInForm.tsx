@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { FirebaseError } from "firebase/app";
-import { createSession, signIn } from "@/services/auth";
+import { createSession, signIn } from "@/auth";
 import { SIGN_IN_COPY } from "./copy";
 import { SignInFormView } from "./SignInFormView";
 

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { FirebaseError } from "firebase/app";
-import { createSession, signUp } from "@/services/auth";
+import { createSession, signUp } from "@/auth";
 import { SIGN_UP_COPY } from "./copy";
 import { SignUpFormView } from "./SignUpFormView";
 
