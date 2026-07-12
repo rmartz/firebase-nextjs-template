@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { FirebaseError } from "firebase/app";
-import { sendPasswordReset } from "@/services/auth";
+import { sendPasswordReset } from "@/auth";
 import { FORGOT_PASSWORD_COPY } from "./copy";
 import { ForgotPasswordFormView } from "./ForgotPasswordFormView";
 
