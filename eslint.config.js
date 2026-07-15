@@ -48,6 +48,46 @@ export default tseslint.config(
       "react-hooks/exhaustive-deps": "error",
     },
   },
+  // Statically enforce the AGENTS.md "Code Conventions" that were previously only
+  // caught by /review. All core ESLint / typescript-eslint — no new dependency.
+  {
+    files: ["src/**/*.{ts,tsx}", "*.{ts,tsx}"],
+    rules: {
+      // "No function-style imports": prefer module-level `import type`.
+      "@typescript-eslint/consistent-type-imports": [
+        "error",
+        { prefer: "type-imports", fixStyle: "separate-type-imports" },
+      ],
+      "@typescript-eslint/no-import-type-side-effects": "error",
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "TSImportType",
+          message:
+            'No function-style imports: use a module-level `import type { … } from "…"`, not inline `import("…").Type`.',
+        },
+        {
+          selector:
+            "CallExpression[callee.type='FunctionExpression'], CallExpression[callee.type='ArrowFunctionExpression']",
+          message:
+            "No IIFEs: extract the logic into a named helper or compute it with a plain expression.",
+        },
+        {
+          selector: "CallExpression[callee.property.name='then']",
+          message: "Use async/await, not `.then()` chains.",
+        },
+        {
+          selector: "CallExpression[callee.name='test']",
+          message: "Use `it()` from Vitest, not `test()`.",
+        },
+        {
+          selector: "CallExpression[callee.property.name='toBeInTheDocument']",
+          message:
+            "Do not use `.toBeInTheDocument()` — use `.toBeDefined()` or check `.textContent`.",
+        },
+      ],
+    },
+  },
   {
     files: ["**/*.{js,mjs,cjs}"],
     extends: [...tseslint.configs.recommended],
