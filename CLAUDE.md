@@ -58,7 +58,7 @@ Public (non-secret) environment config lives in `deployment/{env}.yml` and is va
 - **Favor type inference.** Explicit generic type arguments (for example, `someFn<Foo>(...)`) are a code smell when TypeScript can infer them.
 - **No spurious variables.** Do not assign a value to a variable only to immediately return it on the next line — return the expression directly instead.
 - **No IIFEs** (enforced by eslint `no-restricted-syntax`). Extract the logic into a named helper or compute it with a plain expression.
-- **No function-style imports** (enforced by eslint: `consistent-type-imports` + `no-restricted-syntax`). Use a module-level `import type { … } from "…"`, not inline `import("…").Type`. Dynamic `await import("…")` for conditional loading (e.g., Sentry) is still fine.
+- **No function-style imports** (enforced by eslint: `@typescript-eslint/consistent-type-imports` + `no-restricted-syntax`). Use a module-level `import type { … } from "…"`, not inline `import("…").Type`. Dynamic `await import("…")` for conditional loading (e.g., Sentry) is still fine.
 - **No unnecessary helpers.** Do not extract logic into a helper function unless it separates significant logic or belongs in a different module. Three similar lines is better than a premature abstraction.
 - **Enums and constant objects** should be kept in alphabetical order to minimize merge conflicts.
 - **Prefer enums over string literal unions** for any domain concept with two or more named states (e.g., use `enum Status { Active = "active", Inactive = "inactive" }` rather than `"active" | "inactive"`). String enum values must match the current serialized schema. Export new enums from the module barrel (the directory-level `index.ts` when one exists or is required by the barrel rule above).

@@ -64,7 +64,7 @@ export default tseslint.config(
         {
           selector: "TSImportType",
           message:
-            'No function-style imports: use a module-level `import type { … } from "…"`, not inline `import("…").Type`.',
+            'No function-style imports: use a module-level `import type { … } from "…"`, not `import("…")` in type position.',
         },
         {
           selector:
