@@ -43,6 +43,7 @@ tags: [deployment, config]
 - [validate-pins.mjs](scripts/validate-pins.md) — enforce full-version pins in package.json.
 - [validate-action-pins.mjs](scripts/validate-action-pins.md) — enforce commit-SHA pins on GitHub Actions.
 - [validate-anchor-uniqueness.mjs](scripts/validate-anchor-uniqueness.md) — report per-file edit fragility (anchor uniqueness); POC for the agent-legibility epic.
+- [check-release-age.mjs](scripts/check-release-age.md) — fail a PR that introduces a package version younger than the cooldown window.
 
 ### Subsystems
 
