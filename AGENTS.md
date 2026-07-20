@@ -26,6 +26,15 @@
   Local composite refs (`./.github/actions/*`) are in-repo and exempt. Enforced by
   `pnpm run actions:validate` (the **Action pins** CI job).
 
+- **Let releases age before adopting them (cooldown).** `dependabot.yml` sets a 7-day
+  `cooldown`, but that window is advisory and Dependabot has documented npm reliability
+  gaps, so a deterministic second layer enforces it: `pnpm run release-age:validate`
+  (the **Release Age** CI job) fails a PR that introduces any `pnpm-lock.yaml` version —
+  direct or transitive — younger than `RELEASE_AGE_MIN_DAYS` (default 7). If a
+  Dependabot PR is held by this gate, wait for the version to age past the window and
+  re-run the check rather than forcing the merge; malicious releases are usually caught
+  and yanked within days.
+
 ## Common Commands
 
 ```bash

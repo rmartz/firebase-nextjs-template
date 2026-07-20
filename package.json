@@ -24,7 +24,8 @@
     "docs:validate": "node scripts/validate-docs.mjs",
     "fragility:report": "node scripts/validate-anchor-uniqueness.mjs",
     "env:validate": "node scripts/validate-config.mjs",
-    "pins:validate": "node scripts/validate-pins.mjs"
+    "pins:validate": "node scripts/validate-pins.mjs",
+    "release-age:validate": "node scripts/check-release-age.mjs"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
