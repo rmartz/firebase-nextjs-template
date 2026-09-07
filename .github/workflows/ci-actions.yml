@@ -17,6 +17,7 @@ jobs:
       stories_changed: ${{ steps.classify.outputs.stories_changed }}
       package_changed: ${{ steps.classify.outputs.package_changed }}
       workflows_changed: ${{ steps.classify.outputs.workflows_changed }}
+      agents_changed: ${{ steps.classify.outputs.agents_changed }}
       code_changed: ${{ steps.classify.outputs.code_changed }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -29,6 +30,7 @@ jobs:
             echo "stories_changed=true" >> "$GITHUB_OUTPUT"
             echo "package_changed=true" >> "$GITHUB_OUTPUT"
             echo "workflows_changed=true" >> "$GITHUB_OUTPUT"
+            echo "agents_changed=true" >> "$GITHUB_OUTPUT"
             echo "code_changed=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -60,6 +62,16 @@ jobs:
             workflows_changed=false
           fi
           echo "workflows_changed=$workflows_changed" >> "$GITHUB_OUTPUT"
+          # The agent directive-file pairing check reads only AGENTS.md / CLAUDE.md
+          # files (plus its own validator), so it need only run when one of those
+          # changes. A change to any such file — add, edit, rename, or delete —
+          # matches and reruns the whole-tree check.
+          if printf '%s\n' "$changed" | grep -Eq '(^|/)(AGENTS|CLAUDE)\.md$|^scripts/check-agents-md\.mjs$'; then
+            agents_changed=true
+          else
+            agents_changed=false
+          fi
+          echo "agents_changed=$agents_changed" >> "$GITHUB_OUTPUT"
           # Documentation denylist: run the heavy jobs by default, skip only when
           # EVERY changed file is provably-inert docs (.md / .txt / LICENSE). A new
           # or unanticipated file type fails safe (runs the suite) rather than open.
@@ -74,7 +86,7 @@ jobs:
             code_changed=false
           fi
           echo "code_changed=$code_changed" >> "$GITHUB_OUTPUT"
-          printf 'Resolved: stories_changed=%s package_changed=%s workflows_changed=%s code_changed=%s\n' "$stories_changed" "$package_changed" "$workflows_changed" "$code_changed"
+          printf 'Resolved: stories_changed=%s package_changed=%s workflows_changed=%s agents_changed=%s code_changed=%s\n' "$stories_changed" "$package_changed" "$workflows_changed" "$agents_changed" "$code_changed"
 
   tests:
     name: Tests
@@ -158,6 +170,21 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup
       - run: pnpm run pins:validate
+
+  # Closed-input check: only AGENTS.md / CLAUDE.md files (and the validator
+  # itself) can affect the result, so gate it on those changing. Enforces that
+  # every AGENTS.md is paired with a companion CLAUDE.md whose only content is the
+  # bare `@AGENTS.md` import — directives stay authored once, in AGENTS.md.
+  agents-md:
+    name: Agent directive files
+    needs: detect-changes
+    if: needs.detect-changes.outputs.agents_changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup
+      - run: pnpm run agents:validate
 
   # Closed-input check: only workflow / composite-action YAML (and the validator
   # itself) can affect the result, so gate it on those changing. Enforces that
