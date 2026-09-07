@@ -55,8 +55,12 @@ function collectDirs(dir, found) {
  * — the convention requires a real file containing the import line.
  */
 function wrapperError(claudePath) {
-  if (lstatSync(claudePath).isSymbolicLink()) {
+  const stat = lstatSync(claudePath);
+  if (stat.isSymbolicLink()) {
     return "CLAUDE.md is a symlink; it must be a real file containing only `@AGENTS.md`";
+  }
+  if (!stat.isFile()) {
+    return "CLAUDE.md is not a regular file (e.g. a directory); it must be a real file containing only `@AGENTS.md`";
   }
   const meaningfulLines = readFileSync(claudePath, "utf8")
     .split("\n")
