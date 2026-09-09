@@ -45,7 +45,7 @@
     "firebase": "^12.16.0",
     "firebase-admin": "^14.2.0",
     "lucide-react": "^1.27.0",
-    "next": "16.3.3",
+    "next": "16.3.4",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "react-redux": "^9.3.0",
