@@ -22,6 +22,7 @@
     "emulator": "firebase emulators:start",
     "actions:validate": "node scripts/validate-action-pins.mjs",
     "docs:validate": "node scripts/validate-docs.mjs",
+    "docs:index": "node scripts/validate-docs-index.mjs",
     "fragility:report": "node scripts/validate-anchor-uniqueness.mjs",
     "env:validate": "node scripts/validate-config.mjs",
     "pins:validate": "node scripts/validate-pins.mjs",
@@ -83,6 +84,7 @@
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.69.0",
     "vite": "^8.2.2",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.10",
+    "yaml": "^2.9.0"
   }
 }

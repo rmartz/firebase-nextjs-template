@@ -108,12 +108,20 @@ Public (non-secret) environment config lives in `deployment/{env}.yml` and is va
 - Keep documentation in sync with the code — outdated docs are worse than no docs.
 - Reference pages for scripts and subsystems live under `docs/`, structured to Google's
   Open Knowledge Format (OKF) — one markdown file per script or subsystem, each with YAML
-  frontmatter. See [`docs/README.md`](docs/README.md) for the index, the `type` vocabulary
-  (`Script`, `Subsystem`, `Index`), and the frontmatter shape.
+  frontmatter. See [`docs/okf-format.md`](docs/okf-format.md) for the frontmatter shape and
+  the content-page `type` vocabulary (`Script`, `Subsystem`), and [`docs/index.md`](docs/index.md)
+  for the bundle index.
 - When you add or non-trivially change a script under `scripts/` or a subsystem, add or update
   its `docs/` page in the same PR, including the OKF frontmatter (`type` is required; `title`,
   `description`, `resource`, and `tags` are recommended). Cross-link related pages with plain
   markdown links.
+- Every directory under `docs/` carries an `index.md` (no frontmatter; the bundle-root
+  `docs/index.md` may carry only `okf_version`). List every new content page in its directory's
+  `index.md`, and link every sub-directory's `index.md` from its parent, so all pages stay
+  reachable from `docs/index.md`.
+- The OKF frontmatter and the navigability of the `docs/` tree are enforced in CI (the
+  **Docs (OKF)** job) by `scripts/validate-docs.mjs` (`pnpm run docs:validate`) and
+  `scripts/validate-docs-index.mjs` (`pnpm run docs:index`).
 
 ## Agent Directive Files
 

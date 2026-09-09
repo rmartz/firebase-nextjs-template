@@ -135,7 +135,10 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup
-      - run: pnpm run docs:validate
+      - name: Validate OKF frontmatter
+        run: pnpm run docs:validate
+      - name: Validate docs index navigability
+        run: pnpm run docs:index
 
   # Agent-legibility metrics (epic #161). REPORT-ONLY: this job always passes; it
   # prints the edit-fragility (anchor-uniqueness) table to the log and the PR's
