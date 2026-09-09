@@ -41,16 +41,22 @@ const ISO_8601 =
 const ACTOR = /^(?:human:\S.*|process:\S.*|[^\s:/]+\/\S+)$/;
 
 function extractFrontmatter(content) {
-  // Returns { present, raw } — raw is the text between the leading fences, or
-  // undefined when the file does not open with a --- ... --- block.
+  // Returns { present, malformed, raw } — raw is the text between the leading
+  // fences, or undefined when the file does not open with a --- ... --- block.
+  // malformed is true when an opening fence exists but no closing fence follows.
   const lines = content.split("\n");
-  if (lines[0]?.trim() !== "---") return { present: false, raw: undefined };
+  if (lines[0]?.trim() !== "---")
+    return { present: false, malformed: false, raw: undefined };
   for (let i = 1; i < lines.length; i++) {
     if (lines[i].trim() === "---") {
-      return { present: true, raw: lines.slice(1, i).join("\n") };
+      return {
+        present: true,
+        malformed: false,
+        raw: lines.slice(1, i).join("\n"),
+      };
     }
   }
-  return { present: false, raw: undefined }; // no closing fence → malformed
+  return { present: false, malformed: true, raw: undefined }; // no closing fence
 }
 
 function isPlainObject(value) {
@@ -139,10 +145,20 @@ function validateContentFields(errors, frontmatter) {
   else if (!ALLOWED_TYPES.includes(type))
     errors.push(`INVALID type: ${type} (allowed: ${ALLOWED_TYPES.join(", ")})`);
 
-  if (resource !== undefined && !existsSync(join(root, resource)))
-    errors.push(
-      `MISSING resource: ${resource} (path does not exist in the repo)`,
-    );
+  if (resource !== undefined) {
+    if (typeof resource !== "string") {
+      errors.push("resource must be a string (repo-relative path)");
+    } else {
+      const resolved = join(root, resource);
+      if (relative(root, resolved).startsWith("..")) {
+        errors.push(`resource path escapes the repo root: ${resource}`);
+      } else if (!existsSync(resolved)) {
+        errors.push(
+          `MISSING resource: ${resource} (path does not exist in the repo)`,
+        );
+      }
+    }
+  }
 
   if (status !== undefined && !STATUSES.includes(status))
     errors.push(`INVALID status: ${status} (allowed: ${STATUSES.join(", ")})`);
@@ -173,20 +189,35 @@ function validateContentFields(errors, frontmatter) {
 function validateIndex(errors, relPath, fm) {
   // The bundle root may carry only `okf_version`; every other index.md carries none.
   const isBundleRoot = relPath === "docs/index.md";
+  if (fm.malformed) {
+    errors.push(
+      "index.md has a malformed frontmatter block (opening --- without closing ---)",
+    );
+    return;
+  }
   if (!fm.present) return;
-  const parsed = parseYaml(fm.raw) ?? {};
-  const keys = isPlainObject(parsed) ? Object.keys(parsed) : [];
-  if (isBundleRoot) {
-    const extra = keys.filter((k) => k !== "okf_version");
-    if (extra.length > 0)
-      errors.push(
-        `bundle-root index.md may carry only \`okf_version\` (found: ${extra.join(", ")})`,
-      );
-  } else {
+  if (!isBundleRoot) {
     errors.push(
       "index.md must not carry frontmatter (it is the OKF directory index)",
     );
+    return;
   }
+  let parsed;
+  try {
+    parsed = parseYaml(fm.raw);
+  } catch {
+    errors.push("bundle-root index.md has invalid YAML frontmatter");
+    return;
+  }
+  if (!isPlainObject(parsed)) {
+    errors.push("bundle-root index.md frontmatter must be a YAML mapping");
+    return;
+  }
+  const extra = Object.keys(parsed).filter((k) => k !== "okf_version");
+  if (extra.length > 0)
+    errors.push(
+      `bundle-root index.md may carry only \`okf_version\` (found: ${extra.join(", ")})`,
+    );
 }
 
 function validatePage(absPath) {
@@ -196,10 +227,18 @@ function validatePage(absPath) {
 
   if (basename(absPath) === "index.md") {
     validateIndex(errors, relPath, fm);
+  } else if (fm.malformed) {
+    errors.push("frontmatter block is not closed (missing closing ---)");
   } else if (!fm.present) {
     errors.push("MISSING frontmatter (no leading --- ... --- block)");
   } else {
-    const parsed = parseYaml(fm.raw);
+    let parsed;
+    try {
+      parsed = parseYaml(fm.raw);
+    } catch {
+      errors.push("frontmatter contains invalid YAML");
+      return errors.map((e) => `${relPath}\n  ${e}`);
+    }
     if (!isPlainObject(parsed))
       errors.push("frontmatter must be a YAML mapping");
     else validateContentFields(errors, parsed);

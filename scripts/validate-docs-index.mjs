@@ -112,7 +112,7 @@ function main() {
   }
 
   console.log(
-    `docs/ — ${documented.size} indexed director(ies), all pages reachable`,
+    `docs/ — ${documented.size} indexed director(y/ies), all pages reachable`,
   );
 }
 
