@@ -135,6 +135,45 @@ Public (non-secret) environment config lives in `deployment/{env}.yml` and is va
 - This pairing is enforced in CI by `scripts/check-agents-md.mjs` (run locally with
   `pnpm run agents:validate`). See [`docs/scripts/check-agents-md.md`](docs/scripts/check-agents-md.md).
 
+## Data Access & MCP Parity
+
+These rules keep the MCP surface (once it exists) and the UI from drifting into separate
+capability sets. They apply to all functionality that reads or writes user data, not just
+MCP-specific work.
+
+- **MCP ⊆ UI — no capability gaps.** Every action or read exposed through MCP must also be
+  reachable through a UI-mediated path, even if that path is secondary to the primary
+  workflow. MCP is never a _superset_ of the UI — an agent must not be able to do or see
+  things a user cannot inspect, reproduce, or undo. When adding an MCP tool, the test is
+  "what UI path exercises this same capability?"; if there is no answer, the tool does not
+  ship until there is one.
+
+- **Live delivery layers on a canonical static read — never the source of truth.** A live
+  subscription — RTDB or Firestore `onSnapshot` — is a delivery optimization (push deltas);
+  the authoritative read is a request/response static load path returning the same shape.
+  That static path (a) backstops the subscription when it fails to establish or drops,
+  (b) is what MCP reuses — MCP is pull/RPC, a tool call returns a result and holds no
+  subscription — and (c) is the single canonical read model shared by UI fallback, MCP, and
+  any future consumer. Every live hook (RTDB or Firestore) sits on top of a static loader
+  and uses it for initial/fallback state; an MCP `get_*` tool is then that loader plus the
+  auth wrapper, with no new read logic.
+
+- **Anti-pattern: a live subscription as the _only_ way to read a piece of data.** If
+  reading requires a live subscription (RTDB or Firestore `onSnapshot`), MCP cannot cleanly
+  reach it and the UI has no fallback — exactly the split these rules prevent. Live
+  subscriptions for real-time refresh are encouraged _as long as_ a static load path exists
+  alongside them.
+
+- **Exemption for derived/aggregate live values.** Parity is required at the level of the
+  underlying data, not for every projection of it. A live value (RTDB or Firestore) that is
+  a pure derivation or aggregate of data already reachable through an MCP-usable static path
+  does **not** need its own dedicated static endpoint — e.g. a live unread-notifications
+  count badge needs no standalone "get count" endpoint, because a "get notifications"
+  endpoint already satisfies MCP's likely need and the count is derivable from it. Whether
+  to add a static endpoint for such a derived value anyway (e.g. as a subscription-failure
+  backstop for the badge) is judged on its own resilience/UX merits, not required on
+  principle.
+
 ## React / Next.js Standards
 
 ### Framework
