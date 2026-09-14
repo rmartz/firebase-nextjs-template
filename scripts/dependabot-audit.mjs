@@ -22,7 +22,10 @@
 import { execFileSync } from "node:child_process";
 import { writeFileSync } from "node:fs";
 
-// Groups Dependabot can name in a PR title. Kept in sync with .github/dependabot.yml.
+// Groups Dependabot can name in a PR title — both current active groups and
+// removed historical ones. Historical names (storybook, eslint, tailwind) must
+// be kept here so that past PRs referencing those groups are classified
+// correctly; this list is NOT a mirror of the current .github/dependabot.yml.
 const KNOWN_GROUPS = [
   "dev-dependencies",
   "eslint",
@@ -64,6 +67,12 @@ function groupOf(title) {
     return named[1].toLowerCase();
   }
   if (/\bbump (?!@)[\w.-]+\/[\w.-]+/i.test(title)) return "github-actions";
+  // Map removed-family package names to their family bucket so that future
+  // individual bumps of these packages remain attributable after the groups
+  // were pruned from .github/dependabot.yml.
+  if (/\bstorybook\b/i.test(title)) return "storybook";
+  if (/\beslint\b/i.test(title)) return "eslint";
+  if (/\btailwindcss\b/i.test(title)) return "tailwind";
   return "individual";
 }
 
@@ -101,6 +110,8 @@ function isRed(rollup) {
   return (rollup || []).some(
     (c) =>
       c.conclusion === "FAILURE" ||
+      c.conclusion === "TIMED_OUT" ||
+      c.conclusion === "STARTUP_FAILURE" ||
       c.state === "FAILURE" ||
       c.state === "ERROR",
   );
@@ -149,10 +160,15 @@ export function buildReport(dependabotPrs, otherPrs) {
         stuck: 0,
         pending: 0,
         churn: 0,
+        mechanics: 0,
       });
     }
     const bucket = groups.get(row.group);
-    bucket[row.outcome === CLEAN ? "clean" : row.outcome] += 1;
+    if (row.mechanics && row.outcome === NEEDED_FIX) {
+      bucket.mechanics += 1;
+    } else {
+      bucket[row.outcome === CLEAN ? "clean" : row.outcome] += 1;
+    }
   }
   return { rows, groups };
 }
@@ -193,17 +209,17 @@ function renderMarkdown({ rows, groups }, repo) {
   lines.push("## Per-group intervention rate");
   lines.push("");
   lines.push(
-    "Intervention = needed a merged fix PR, or open-and-red. Churn and still-pending PRs are excluded from the denominator.",
+    "Intervention = needed a merged fix PR (excluding lockfile-repair mechanics), or open-and-red. Churn, pending PRs, and mechanics fixes are excluded from the denominator.",
   );
   lines.push("");
   lines.push(
-    "| Group | Clean | Needed fix | Stuck | Churn | Intervention rate |",
+    "| Group | Clean | Needed fix | Stuck | Mechanics | Churn | Pending | Intervention rate |",
   );
-  lines.push("| --- | --: | --: | --: | --: | --- |");
+  lines.push("| --- | --: | --: | --: | --: | --: | --: | --- |");
   for (const [name, bucket] of [...groups.entries()].sort()) {
     const r = rate(bucket);
     lines.push(
-      `| \`${name}\` | ${bucket.clean} | ${bucket[NEEDED_FIX]} | ${bucket.stuck} | ${bucket.churn} | ${r.label} |`,
+      `| \`${name}\` | ${bucket.clean} | ${bucket[NEEDED_FIX]} | ${bucket.stuck} | ${bucket.mechanics} | ${bucket.churn} | ${bucket.pending} | ${r.label} |`,
     );
   }
   lines.push("");
@@ -289,7 +305,8 @@ function main() {
   ).filter(
     (pr) =>
       pr.author?.login !== "app/dependabot" &&
-      pr.author?.login !== "dependabot",
+      pr.author?.login !== "dependabot" &&
+      pr.author?.login !== "dependabot[bot]",
   );
 
   const report = buildReport(dependabotPrs, otherPrs);
