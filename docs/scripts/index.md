@@ -5,6 +5,7 @@ Reference pages for the executables under `scripts/`. See
 
 - [capture-screenshots.mjs](capture-screenshots.md) — screenshot every Storybook story in Chromium for visual acceptance review.
 - [check-agents-md.mjs](check-agents-md.md) — enforce that every AGENTS.md is paired with a bare `@AGENTS.md` CLAUDE.md wrapper.
+- [dependabot-audit.mjs](dependabot-audit.md) — classify every Dependabot PR's outcome and report per-group intervention rates.
 - [update-config.sh](update-config.md) — update public deployment config, validate it, and optionally sync to Vercel.
 - [validate-action-pins.mjs](validate-action-pins.md) — enforce commit-SHA pins on GitHub Actions.
 - [validate-anchor-uniqueness.mjs](validate-anchor-uniqueness.md) — report per-file edit fragility (anchor uniqueness); POC for the agent-legibility epic.
