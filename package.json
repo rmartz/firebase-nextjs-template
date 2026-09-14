@@ -20,13 +20,11 @@
     "screenshots": "node scripts/capture-screenshots.mjs",
     "prepare": "husky",
     "emulator": "firebase emulators:start",
-    "actions:validate": "node scripts/validate-action-pins.mjs",
-    "docs:validate": "node scripts/validate-docs.mjs",
-    "docs:index": "node scripts/validate-docs-index.mjs",
+    "hygiene": "ai-repo-hygiene --check",
+    "hygiene:staged": "ai-repo-hygiene --staged",
     "fragility:report": "node scripts/validate-anchor-uniqueness.mjs",
     "env:validate": "node scripts/validate-config.mjs",
-    "pins:validate": "node scripts/validate-pins.mjs",
-    "agents:validate": "node scripts/check-agents-md.mjs"
+    "pins:validate": "node scripts/validate-pins.mjs"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
@@ -54,6 +52,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@rmartz/repo-hygiene": "^0.4.0",
     "@storybook/addon-a11y": "^10.6.0",
     "@storybook/addon-docs": "^10.6.0",
     "@storybook/addon-vitest": "^10.6.0",

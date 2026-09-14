@@ -1,7 +1,7 @@
-node_modules
-dist
-.next
+# node_modules, dist, .next, .git-worktrees, storybook-static, next-env.d.ts,
+# screenshots and .env* are already ignored via .gitignore, which Prettier
+# respects — no need to repeat them here. List only the tracked paths Prettier
+# must still skip.
 .claude
 src/components/ui
 pnpm-lock.yaml
-.git-worktrees

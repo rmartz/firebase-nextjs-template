@@ -36,4 +36,4 @@ Exits 0 when every pin is full; exits 1 with a `section / dependency / "range"` 
 
 ## Related
 
-- [validate-config.mjs](validate-config.md), [validate-docs.mjs](validate-docs.md) — sibling standalone validators.
+- [validate-config.mjs](validate-config.md) — sibling standalone validator.

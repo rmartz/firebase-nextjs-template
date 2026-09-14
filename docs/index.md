@@ -20,6 +20,7 @@ by following links from this file down. Start here:
 - [Subsystems](subsystems/index.md) — reference pages for cohesive areas of the
   codebase.
 
-Both the frontmatter and the navigability of this tree are enforced in CI — see
-[validate-docs.mjs](scripts/validate-docs.md) and
-[validate-docs-index.mjs](scripts/validate-docs-index.md).
+The OKF frontmatter of these pages is enforced in CI by the Hygiene job
+(`@rmartz/repo-hygiene`'s `okf` check — run locally with `pnpm run hygiene`).
+See [the OKF format](okf-format.md) and
+[the repo-hygiene subsystem](subsystems/repo-hygiene.md).

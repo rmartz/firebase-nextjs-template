@@ -8,8 +8,9 @@ import boundaries from "eslint-plugin-boundaries";
 export default tseslint.config(
   {
     ignores: [
+      // node_modules is ignored by ESLint's flat-config defaults. The rest are
+      // not — ESLint does not read .gitignore — so they stay listed here.
       "**/dist/**",
-      "**/node_modules/**",
       "**/.next/**",
       "**/next-env.d.ts",
       ".storybook/**",

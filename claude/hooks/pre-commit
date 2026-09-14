@@ -6,5 +6,7 @@
 # that PostToolUse ESLint pass and by `pnpm lint` in pre-push-verify — no separate
 # length check here.
 set -e
-bash scripts/check-conflict-markers.sh --staged
+# Repo-hygiene gates over staged content (conflict markers, action pins,
+# AGENTS/CLAUDE pairing, OKF frontmatter, file caps) — @rmartz/repo-hygiene.
+pnpm run hygiene:staged
 pnpm run env:validate
