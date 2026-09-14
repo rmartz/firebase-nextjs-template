@@ -65,23 +65,25 @@ ai-tools' own workflow **builds** the CLI from monorepo source; this repo
 `invalidate`, and `--json`). `git` and `gh` are pre-installed on the runner, so
 the jobs only need Node plus the global CLI install.
 
-## Private-package auth (prerequisite)
+## Private-package auth
 
 `@rmartz/pr-review` is a **private GitHub Packages** package published from
-`rmartz/ai-tools`, so a consumer repo's default `GITHUB_TOKEN` **cannot read it
-cross-repo** without being granted access. This repo uses the **package-access
-grant** approach (no long-lived PAT secret):
+`rmartz/ai-tools`. The workflow authenticates with the built-in `GITHUB_TOKEN`
+via `permissions: packages: read` (no long-lived PAT secret) —
+`actions/setup-node` writes the scoped `@rmartz` registry `.npmrc` and
+`npm install -g` reads `NODE_AUTH_TOKEN`.
 
-1. In **ai-tools → Packages → `@rmartz/pr-review` → Package settings → Manage
-   Actions access**, add the **`rmartz/firebase-nextjs-template`** repository with
-   **Read** access.
-2. The workflow then authenticates with the built-in `GITHUB_TOKEN` via
-   `permissions: packages: read` — `actions/setup-node` writes the scoped
-   `@rmartz` registry `.npmrc` and `npm install -g` reads `NODE_AUTH_TOKEN`.
+Because both repos share the **same owner** (`rmartz`), the consumer's
+`GITHUB_TOKEN` reads the package directly — no extra grant was needed here
+(verified: the check ran green on the PR that introduced it). If a consumer repo
+ever hits a `401` on the `Install ai-merge-safety CLI` step (a different owner, or
+stricter package visibility), grant it read access in **ai-tools → Packages →
+`@rmartz/pr-review` → Package settings → Manage Actions access** by adding the
+repository with **Read**. Verify locally with `npm view @rmartz/pr-review version`
+(needs a `read:packages` token).
 
-Until the grant is in place the `Install ai-merge-safety CLI` step fails with a
-`401`; it clears on the next run once access is granted. Verify locally with
-`npm view @rmartz/pr-review version` (needs a `read:packages` token).
+This cross-repo access is the crux ai-tools#188 must standardize when it
+distributes the workflow to repos beyond this owner's.
 
 ## Labels (visibility)
 
