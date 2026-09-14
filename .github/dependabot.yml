@@ -39,15 +39,6 @@ updates:
           - "react-dom"
           - "@types/react"
           - "@types/react-dom"
-      storybook:
-        # Every @storybook/* package, the storybook CLI, and the eslint plugin
-        # share one Storybook version line — a Storybook major must move them all.
-        patterns:
-          - "storybook"
-          - "@storybook/*"
-          - "eslint-plugin-storybook"
-        update-types:
-          - "major"
       vite:
         # vite + its react plugin + vitest + @vitest/* are one interlocked
         # toolchain: a vite major dictates the plugin and vitest majors (the
@@ -59,24 +50,18 @@ updates:
           - "@vitest/*"
         update-types:
           - "major"
-      eslint:
-        # eslint + @eslint/js share a version line; typescript-eslint and the
-        # react-hooks plugin track the eslint major.
-        patterns:
-          - "eslint"
-          - "@eslint/js"
-          - "typescript-eslint"
-          - "eslint-plugin-react-hooks"
-        update-types:
-          - "major"
-      tailwind:
-        # tailwindcss core + its postcss plugin ship in lockstep (both moved
-        # 4.3.1 -> 4.3.2 together); a mismatch fails the build.
-        patterns:
-          - "tailwindcss"
-          - "@tailwindcss/*"
-        update-types:
-          - "major"
+      # NOTE: storybook, eslint, and tailwind were previously grouped here as
+      # major-only lockstep families, on the assumption a major must move every
+      # member together. That assumption is UNTESTED for them: across the full
+      # Dependabot history none of the three ever produced a single group PR — no
+      # major bump of those families has occurred. They were removed (issue #222)
+      # so that a future major surfaces as individual per-package PRs and
+      # scripts/dependabot-audit.mjs can measure whether an ungrouped major
+      # actually breaks the build. Re-add a family group only when that audit
+      # shows an ungrouped major of it needed a companion fix PR to unblock.
+      # react and vite are kept: both have merged real bumps cleanly, react must
+      # span the prod/dev split, and vite's major (#207) landed green while
+      # grouped — so their lockstep grouping is evidence-backed, not assumed.
       # TypeScript is the language/compiler itself, not a runtime library. A
       # major or minor bump can change type-checking behavior across the whole
       # codebase (new errors, changed inference) — a more significant, more
