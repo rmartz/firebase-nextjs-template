@@ -44,4 +44,4 @@ Each flagged file lists its top repeated lines (`x4  args: {`) so the fragility 
 
 ## Related
 
-- [validate-pins.mjs](validate-pins.md), [validate-action-pins.mjs](validate-action-pins.md) — sibling standalone validators (these gate; this one reports).
+- [validate-pins.mjs](validate-pins.md) — sibling standalone validator (it gates; this one reports).

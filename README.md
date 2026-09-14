@@ -33,9 +33,10 @@ A template repository for building Next.js applications with Firebase, deployed 
 
 1. Click **"Use this template"** on GitHub to create a new repository
 2. Clone your new repository
-3. Install dependencies:
+3. Install dependencies (`@rmartz/repo-hygiene` is published to GitHub Packages, so
+   `pnpm install` needs a `read:packages` token — see [CONTRIBUTING.md](CONTRIBUTING.md)):
    ```bash
-   pnpm install
+   NODE_AUTH_TOKEN=$(gh auth token) pnpm install
    ```
 4. Copy the environment template and fill in your Firebase credentials:
    ```bash
@@ -65,6 +66,7 @@ pnpm storybook        # Start Storybook dev server (port 6006)
 pnpm build-storybook  # Build static Storybook
 pnpm screenshots      # Screenshot every story for visual review (run after build-storybook)
 pnpm run env:validate # Validate deployment config files against schema (also runs on every commit)
+pnpm run hygiene      # Run @rmartz/repo-hygiene checks (conflict markers, action pins, pairing, OKF, file caps)
 ```
 
 ## Project Structure
@@ -140,7 +142,7 @@ Secret rotation (Firebase service account, Sentry token) is handled by the `envc
 
 ### GitHub Actions
 
-CI runs automatically on every PR as parallel jobs in [`.github/workflows/ci-actions.yml`](.github/workflows/ci-actions.yml): Tests, Lint (which also enforces the file-length hard cap via the eslint `max-lines` rule), Format, Type check, Docs (OKF), Build, and **Storybook Tests** (stories run as browser tests in Chromium). A **Storybook Screenshots** job additionally runs when a `*.stories.tsx` file changes — it captures a screenshot of every story and uploads them as a workflow artifact for visual review. It is advisory (`continue-on-error`), so it never blocks merge; download the `storybook-screenshots` artifact from the run to review.
+CI runs automatically on every PR as parallel jobs in [`.github/workflows/ci-actions.yml`](.github/workflows/ci-actions.yml): Tests, Lint (which also enforces the JS/TS file-length hard cap via the eslint `max-lines` rule), Format, Type check, Hygiene ([`@rmartz/repo-hygiene`](docs/subsystems/repo-hygiene.md): conflict markers, action pins, `AGENTS.md`/`CLAUDE.md` pairing, OKF frontmatter, file caps), Build, and **Storybook Tests** (stories run as browser tests in Chromium). A **Storybook Screenshots** job additionally runs when a `*.stories.tsx` file changes — it captures a screenshot of every story and uploads them as a workflow artifact for visual review. It is advisory (`continue-on-error`), so it never blocks merge; download the `storybook-screenshots` artifact from the run to review.
 
 Additional workflows:
 

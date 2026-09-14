@@ -1,0 +1,50 @@
+# Repository hygiene gates, enforced by @rmartz/repo-hygiene — via the `hygiene`
+# / `hygiene:staged` package scripts, the pre-commit hooks, and the Hygiene CI
+# job. All five shipped checks run by default (naming none runs every builtin):
+#
+#   - conflict-markers  merge-conflict markers in tracked/staged content
+#   - action-pins       every GitHub Action pinned to a SHA + full-semver comment
+#   - md-pairing        AGENTS.md / CLAUDE.md travel together, as real files
+#   - okf               OKF frontmatter conformance for docs/ pages (see below)
+#   - file-caps         per-glob line/byte size caps (see below)
+#
+# Only checks that need settings appear below; the rest use their defaults.
+#
+# This template consolidated its previously-bespoke check scripts onto the
+# shared package. Where a centralized check does not yet cover a rule the old
+# local script enforced, an ai-tools issue tracks the gap — when it lands, bump
+# the dependency to inherit the coverage (no template change needed):
+#   - okf optional field families (status/timestamps/actors/…): rmartz/ai-tools#202
+#   - okf index-tree navigability + index-page frontmatter rules: rmartz/ai-tools#200
+#   - md-pairing bare `@AGENTS.md` wrapper content: rmartz/ai-tools#203
+#
+# Zero-soft-tier stance (mirrors `eslint --max-warnings 0`): every tier is an
+# error tier — no warn-only thresholds that would pass silently.
+checks:
+  okf:
+    types: [Script, Subsystem]
+    roots: [docs]
+    # Index pages are the OKF directory index and carry no content frontmatter,
+    # so they are out of content-page scope. (`exempt` is an exact-path list, not
+    # globs; a new docs subdirectory's index.md must be added here until the
+    # package handles index pages natively — rmartz/ai-tools#200.)
+    exempt:
+      - docs/index.md
+      - docs/scripts/index.md
+      - docs/subsystems/index.md
+    # A Subsystem page documents a conceptual area rather than a single file, so
+    # it needs no `resource`.
+    resourceExemptTypes: [Subsystem]
+  file-caps:
+    # Ordered, first-match-wins (most-specific first). Line caps only, born-green
+    # with no baseline — no tracked file is over cap. Markdown prose runs longer
+    # than code; generated / vendored files are effectively uncapped.
+    overrides:
+      - glob: "**/pnpm-lock.yaml"
+        lines: { error: 100000 }
+      - glob: "src/components/ui/**"
+        lines: { error: 1000 }
+      - glob: "**/*.md"
+        lines: { error: 600 }
+      - glob: "**/*"
+        lines: { error: 500 }

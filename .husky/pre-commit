@@ -3,8 +3,10 @@
 if [ -f ".git" ]; then
   exit 0
 fi
-bash scripts/check-conflict-markers.sh --staged
-# lint-staged runs eslint on staged files, which enforces the file-length hard
-# cap via the `max-lines` rule (no separate length check needed).
+# Repo-hygiene gates over staged content (conflict markers, action pins,
+# AGENTS/CLAUDE pairing, OKF frontmatter, file caps) — @rmartz/repo-hygiene.
+pnpm run hygiene:staged
+# lint-staged runs eslint on staged files, which enforces the JS/TS file-length
+# hard cap via the `max-lines` rule (file-caps covers the other file types).
 pnpm exec lint-staged
 pnpm run env:validate

@@ -9,10 +9,22 @@ Guidelines for contributing to projects built from this template.
 
 ## Setup
 
+This project depends on [`@rmartz/repo-hygiene`](https://github.com/rmartz/ai-tools),
+published to GitHub Packages, so `pnpm install` must authenticate. Provide a
+`NODE_AUTH_TOKEN` with `read:packages` scope — the simplest source is your `gh`
+token:
+
 ```bash
-pnpm install
+NODE_AUTH_TOKEN=$(gh auth token) pnpm install
 cp .env.example .env.local  # Fill in your Firebase credentials
 pnpm dev
+```
+
+Alternatively, add the token to your global `~/.npmrc` so plain `pnpm install`
+works:
+
+```
+//npm.pkg.github.com/:_authToken=<a token with read:packages>
 ```
 
 ## Development Workflow
@@ -47,6 +59,7 @@ This project uses [Husky](https://typicode.github.io/husky/) with [lint-staged](
 
 - **ESLint** — Lints and auto-fixes `.ts`, `.tsx`, `.js`, `.mjs`, `.cjs` files
 - **Prettier** — Formats `.ts`, `.tsx`, `.js`, `.mjs`, `.cjs`, `.json`, `.md`, `.yml`, `.yaml` files
+- **Repo hygiene** — `@rmartz/repo-hygiene` gates over staged content: merge-conflict markers, GitHub Action SHA pins, `AGENTS.md`/`CLAUDE.md` pairing, OKF frontmatter, and file-size caps
 
 If a pre-commit hook fails, fix the issues and try committing again.
 
@@ -68,14 +81,15 @@ No `feat:`/`fix:` conventional commit prefixes.
 
 ## CI Checks
 
-Every PR runs four parallel checks via GitHub Actions:
+Every PR runs several parallel checks via GitHub Actions:
 
-| Check  | Command             | Must Pass           |
-| ------ | ------------------- | ------------------- |
-| Tests  | `pnpm test`         | Yes                 |
-| Lint   | `pnpm lint`         | Yes (zero warnings) |
-| Format | `pnpm format:check` | Yes                 |
-| Build  | `pnpm build`        | Yes                 |
+| Check   | Command             | Must Pass           |
+| ------- | ------------------- | ------------------- |
+| Tests   | `pnpm test`         | Yes                 |
+| Lint    | `pnpm lint`         | Yes (zero warnings) |
+| Format  | `pnpm format:check` | Yes                 |
+| Build   | `pnpm build`        | Yes                 |
+| Hygiene | `pnpm run hygiene`  | Yes                 |
 
 ## Storybook
 

@@ -74,11 +74,10 @@ down (e.g. `docs/index.md` → `scripts/index.md` → `scripts/validate-docs.md`
 
 ## Enforcement
 
-Both rules are gated in CI (the **Docs (OKF)** job):
+OKF frontmatter conformance on content pages is gated in CI by the **Hygiene**
+job — `@rmartz/repo-hygiene`'s `okf` check — run locally with `pnpm run hygiene`.
+See [the repo-hygiene subsystem](subsystems/repo-hygiene.md).
 
-- [validate-docs.mjs](scripts/validate-docs.md) — frontmatter conformance on
-  content pages, and the no-frontmatter rule on indexes.
-- [validate-docs-index.mjs](scripts/validate-docs-index.md) — navigability of
-  the `index.md` tree.
-
-Run them locally with `pnpm run docs:validate` and `pnpm run docs:index`.
+The index-tree navigability and the no-frontmatter-on-index conventions above are
+not yet covered by the centralized check; folding them into the shared package is
+tracked in [rmartz/ai-tools#200](https://github.com/rmartz/ai-tools/issues/200).

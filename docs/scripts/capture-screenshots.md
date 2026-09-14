@@ -40,4 +40,4 @@ It uploads `screenshots/` as a workflow artifact — download it from the run's 
 
 ## Related
 
-- [validate-docs.mjs](validate-docs.md) — sibling standalone script.
+- [validate-config.mjs](validate-config.md) — sibling standalone script.

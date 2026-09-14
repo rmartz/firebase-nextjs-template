@@ -24,7 +24,8 @@
   workflow token; a SHA is immutable. The `# <version>` comment is Dependabot's
   convention — it reads the version there and bumps the SHA and comment together.
   Local composite refs (`./.github/actions/*`) are in-repo and exempt. Enforced by
-  `pnpm run actions:validate` (the **Action pins** CI job).
+  `@rmartz/repo-hygiene`'s `action-pins` check (`pnpm run hygiene` / the **Hygiene**
+  CI job). See [the repo-hygiene subsystem](docs/subsystems/repo-hygiene.md).
 
 ## Common Commands
 
@@ -41,7 +42,8 @@ pnpm build-storybook  # Build static Storybook
 pnpm screenshots      # Screenshot every story for visual review (run after build-storybook)
 pnpm run env:validate # Validate deployment config files against schema (also runs pre-commit)
 pnpm run pins:validate # Check package.json pins are full [major].[minor].[patch] versions
-pnpm run actions:validate # Check GitHub Actions are pinned to commit SHAs
+pnpm run hygiene      # Run all @rmartz/repo-hygiene checks over tracked files
+pnpm run hygiene:staged # Run the hygiene checks over staged content (pre-commit)
 ```
 
 ## Worktree Setup
@@ -67,6 +69,7 @@ Public (non-secret) environment config lives in `deployment/{env}.yml` and is va
 
 - **Source files**: Keep under ~200 lines (split at ~240). Large files should be split by logical concern. A **hard cap of 400 lines** is enforced by the eslint `max-lines` rule (`pnpm lint` / editor / the Lint CI job); the ~200/240 targets are what you aim for well under it, not the limit.
 - **Test files**: Keep under ~300 lines (split at ~360), **hard cap 600** (also eslint `max-lines`). Use `.spec.ts` / `.spec.tsx` extension (not `.test.ts`). When splitting, organize into a `{module}-tests/` directory with domain-specific files.
+- **Non-JS/TS files** (Markdown, scripts, config) are line-capped by `@rmartz/repo-hygiene`'s `file-caps` check (`pnpm run hygiene` / the **Hygiene** CI job) — the eslint `max-lines` rule only covers `.ts`/`.tsx`. See [`.repo-hygiene.yml`](.repo-hygiene.yml) for the per-glob caps.
 - **Components**: A component file contains its primary component and props interface. A sub-component may be co-located in the same file if it owns no hooks, state, effects, or context, and is used only by the parent component in that file — e.g., a context wrapper, structural template, or props alias. A sub-component must be in its own file when any of these are true: it owns hooks, state, effects, or context; it is referenced from multiple parents; or it is substantial enough to warrant its own stories or tests (e.g., list items, row components, panels, form sections). All component props must be defined as an explicitly named interface (e.g., `interface UserListProps`), never inline in the function signature.
 - **Type files**: Convert large type files into barrel-exported directories with one file per logical domain.
 - Add a barrel `index.ts` when a component or module directory exposes a public API or already
@@ -119,9 +122,10 @@ Public (non-secret) environment config lives in `deployment/{env}.yml` and is va
   `docs/index.md` may carry only `okf_version`). List every new content page in its directory's
   `index.md`, and link every sub-directory's `index.md` from its parent, so all pages stay
   reachable from `docs/index.md`.
-- The OKF frontmatter and the navigability of the `docs/` tree are enforced in CI (the
-  **Docs (OKF)** job) by `scripts/validate-docs.mjs` (`pnpm run docs:validate`) and
-  `scripts/validate-docs-index.mjs` (`pnpm run docs:index`).
+- The OKF frontmatter of `docs/` content pages is enforced in CI by
+  `@rmartz/repo-hygiene`'s `okf` check (`pnpm run hygiene` / the **Hygiene** job). The
+  index-page and tree-navigability conventions above are not yet covered by the
+  centralized check — see [the repo-hygiene subsystem](docs/subsystems/repo-hygiene.md).
 
 ## Agent Directive Files
 
@@ -132,8 +136,10 @@ Public (non-secret) environment config lives in `deployment/{env}.yml` and is va
 - **Every `CLAUDE.md` is a bare wrapper** whose only content is the Claude Code import line
   `@AGENTS.md` — no directives, no other text, no symlinks. This feeds the `AGENTS.md` directives
   to Claude Code while keeping them authored once.
-- This pairing is enforced in CI by `scripts/check-agents-md.mjs` (run locally with
-  `pnpm run agents:validate`). See [`docs/scripts/check-agents-md.md`](docs/scripts/check-agents-md.md).
+- The `AGENTS.md` / `CLAUDE.md` pairing is enforced in CI by `@rmartz/repo-hygiene`'s
+  `md-pairing` check (`pnpm run hygiene` / the **Hygiene** job). The bare-`@AGENTS.md`
+  wrapper-content rule above is a convention not yet gated by the centralized check —
+  see [the repo-hygiene subsystem](docs/subsystems/repo-hygiene.md).
 
 ## Data Access & MCP Parity
 
