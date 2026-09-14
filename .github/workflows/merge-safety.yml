@@ -1,0 +1,104 @@
+name: merge-safety
+
+# Advisory PR check that answers, per PR: "must this PR be brought current against
+# its base before merge?" (stale AND breaking/`ci`/file-overlap), plus a
+# merge-conflict axis. The judgment lives entirely in the pinned, published
+# @rmartz/pr-review CLI (`ai-merge-safety`) — this repo CONSUMES it, it does not
+# re-implement the predicate. See docs/subsystems/merge-safety.md.
+#
+# Unlike ai-tools' own workflow (which builds the CLI from monorepo source), this
+# is a CONSUMER: it INSTALLS the published `@rmartz/pr-review` package. That
+# package is private to GitHub Packages, so this repo must be granted read access
+# to it (see the doc) and the jobs authenticate with the built-in GITHUB_TOKEN
+# via `permissions: packages: read`.
+#
+# Two paths:
+#   - pull_request / workflow_dispatch → evaluate ONE PR and resolve its check.
+#   - push to main                     → invalidate every other open PR (flip to
+#                                        pending + dispatch its own evaluate),
+#                                        so a moved base holds a PR's verdict
+#                                        until it re-clears against the new base.
+#
+# This is a proof-of-concept stopgap (issue #233); ai-tools#188 will later replace
+# it with a standardized golden workflow, so it is kept close to ai-tools' shape.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited, labeled, unlabeled]
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: PR number to evaluate
+        required: true
+
+permissions:
+  checks: write # post/flip the merge-safety check-run
+  pull-requests: write # reconcile the update-required / merge-conflict labels
+  contents: read
+  actions: write # dispatch per-PR evaluate runs from the push fan-out
+  packages: read # install the private @rmartz/pr-review package with GITHUB_TOKEN
+
+concurrency:
+  group: merge-safety-${{ github.event_name == 'push' && 'invalidate' || github.event.pull_request.number || inputs.pr }}
+  cancel-in-progress: false
+
+env:
+  # Pin the published CLI; ai-tools#233 requires >= 0.4.0 (evaluate/invalidate/--json).
+  PR_REVIEW_VERSION: 0.4.0
+
+jobs:
+  evaluate:
+    name: Evaluate one PR
+    if: github.event_name != 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr }}
+    steps:
+      # Consume the PR purely as git data: check out the trusted base (main), not
+      # the PR working tree, so a gate never runs PR-authored build scripts under
+      # this write-scoped token and the verdict reflects the pinned predicate —
+      # never whether the PR compiles. Full history for merge-base + diffs.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 24.x
+          registry-url: https://npm.pkg.github.com
+          scope: "@rmartz"
+      - name: Install ai-merge-safety CLI
+        run: npm install -g "@rmartz/pr-review@${PR_REVIEW_VERSION}"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Fetch the PR head as git data immediately before evaluating, so merge-base
+      # resolves on the dispatched (workflow_dispatch) path too — which checks out
+      # main and would otherwise lack the head entirely.
+      - name: Fetch PR head
+        run: git fetch --quiet origin main "pull/${PR_NUMBER}/head"
+      - name: Evaluate merge-safety
+        run: ai-merge-safety evaluate --pr "$PR_NUMBER" --repo "$GITHUB_REPOSITORY"
+
+  invalidate:
+    name: Invalidate open PRs (base moved)
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 24.x
+          registry-url: https://npm.pkg.github.com
+          scope: "@rmartz"
+      - name: Install ai-merge-safety CLI
+        run: npm install -g "@rmartz/pr-review@${PR_REVIEW_VERSION}"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Invalidate open PRs
+        run: ai-merge-safety invalidate --repo "$GITHUB_REPOSITORY"
