@@ -35,6 +35,13 @@ export default defineConfig({
           alias: { "@": path.resolve(import.meta.dirname, "./src") },
         },
       },
+      {
+        test: {
+          name: "scripts",
+          environment: "node",
+          include: ["scripts/**/*.spec.mjs"],
+        },
+      },
     ],
   },
 });
