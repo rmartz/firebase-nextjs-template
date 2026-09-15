@@ -1,26 +1,8 @@
-name: merge-safety
+# >>> ai-tools managed (ensure-project-config) — do not edit by hand >>>
+# Source of truth: @rmartz/bootstrap golden workflow files. Re-run the
+# /bootstrap skill (ai-ensure-project-config) to re-sync; local edits are lost.
 
-# Advisory PR check that answers, per PR: "must this PR be brought current against
-# its base before merge?" (stale AND breaking/`ci`/file-overlap), plus a
-# merge-conflict axis. The judgment lives entirely in the pinned, published
-# @rmartz/pr-review CLI (`ai-merge-safety`) — this repo CONSUMES it, it does not
-# re-implement the predicate. See docs/subsystems/merge-safety.md.
-#
-# Unlike ai-tools' own workflow (which builds the CLI from monorepo source), this
-# is a CONSUMER: it INSTALLS the published `@rmartz/pr-review` package. That
-# package is private to GitHub Packages, so this repo must be granted read access
-# to it (see the doc) and the jobs authenticate with the built-in GITHUB_TOKEN
-# via `permissions: packages: read`.
-#
-# Two paths:
-#   - pull_request / workflow_dispatch → evaluate ONE PR and resolve its check.
-#   - push to main                     → invalidate every other open PR (flip to
-#                                        pending + dispatch its own evaluate),
-#                                        so a moved base holds a PR's verdict
-#                                        until it re-clears against the new base.
-#
-# This is a proof-of-concept stopgap (issue #233); ai-tools#188 will later replace
-# it with a standardized golden workflow, so it is kept close to ai-tools' shape.
+name: merge-safety
 
 on:
   pull_request:
@@ -34,19 +16,18 @@ on:
         required: true
 
 permissions:
-  checks: write # post/flip the merge-safety check-run
-  pull-requests: write # reconcile the update-required / merge-conflict labels
+  checks: write
+  pull-requests: write
   contents: read
-  actions: write # dispatch per-PR evaluate runs from the push fan-out
-  packages: read # install the private @rmartz/pr-review package with GITHUB_TOKEN
+  actions: write
+  packages: read
 
 concurrency:
   group: merge-safety-${{ github.event_name == 'push' && 'invalidate' || github.event.pull_request.number || inputs.pr }}
   cancel-in-progress: false
 
 env:
-  # Pin the published CLI; ai-tools#233 requires >= 0.4.0 (evaluate/invalidate/--json).
-  PR_REVIEW_VERSION: 0.4.0
+  MERGE_SAFETY_VERSION: 0.4.0
 
 jobs:
   evaluate:
@@ -57,31 +38,22 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr }}
+      BASE_REF: ${{ github.event.pull_request.base.ref || github.event.repository.default_branch }}
     steps:
-      # Consume the PR purely as git data: check out the trusted base (main), not
-      # the PR working tree, so a gate never runs PR-authored build scripts under
-      # this write-scoped token and the verdict reflects the pinned predicate —
-      # never whether the PR compiles. Full history for merge-base + diffs.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: main
-          fetch-depth: 0
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: 24.x
-          registry-url: https://npm.pkg.github.com
-          scope: "@rmartz"
-      - name: Install ai-merge-safety CLI
-        run: npm install -g "@rmartz/pr-review@${PR_REVIEW_VERSION}"
+          ref: ${{ github.event.pull_request.base.ref || github.event.repository.default_branch }}
+          fetch-depth: 0 # merge-base + diffs need full history
+      - name: Install ai-merge-safety
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # Fetch the PR head as git data immediately before evaluating, so merge-base
-      # resolves on the dispatched (workflow_dispatch) path too — which checks out
-      # main and would otherwise lack the head entirely.
-      - name: Fetch PR head
-        run: git fetch --quiet origin main "pull/${PR_NUMBER}/head"
-      - name: Evaluate merge-safety
-        run: ai-merge-safety evaluate --pr "$PR_NUMBER" --repo "$GITHUB_REPOSITORY"
+        run: |
+          printf '@rmartz:registry=https://npm.pkg.github.com\n//npm.pkg.github.com/:_authToken=%s\n' "${NODE_AUTH_TOKEN}" > ~/.npmrc
+          npm install -g "@rmartz/pr-review@${MERGE_SAFETY_VERSION}"
+      # Fetch the PR head as git data so merge-base/diffs resolve — the dispatched
+      # (workflow_dispatch) path checks out the base and would otherwise lack it.
+      - run: git fetch --quiet origin "${BASE_REF}" "pull/${PR_NUMBER}/head"
+      - run: ai-merge-safety evaluate --pr "${PR_NUMBER}" --repo "${GITHUB_REPOSITORY}" --base "origin/${BASE_REF}"
 
   invalidate:
     name: Invalidate open PRs (base moved)
@@ -91,14 +63,10 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: 24.x
-          registry-url: https://npm.pkg.github.com
-          scope: "@rmartz"
-      - name: Install ai-merge-safety CLI
-        run: npm install -g "@rmartz/pr-review@${PR_REVIEW_VERSION}"
+      - name: Install ai-merge-safety
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Invalidate open PRs
-        run: ai-merge-safety invalidate --repo "$GITHUB_REPOSITORY"
+        run: |
+          printf '@rmartz:registry=https://npm.pkg.github.com\n//npm.pkg.github.com/:_authToken=%s\n' "${NODE_AUTH_TOKEN}" > ~/.npmrc
+          npm install -g "@rmartz/pr-review@${MERGE_SAFETY_VERSION}"
+      - run: ai-merge-safety invalidate --repo "${GITHUB_REPOSITORY}"
