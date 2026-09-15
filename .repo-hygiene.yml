@@ -42,6 +42,11 @@ checks:
     overrides:
       - glob: "**/pnpm-lock.yaml"
         lines: { error: 100000 }
+      # Append-only metrics ledgers (one JSON line per CI run) grow without
+      # bound by design — the whole point is to accumulate a distribution over
+      # time (edit-fragility evaluation, #237). Effectively uncapped.
+      - glob: "metrics/**"
+        lines: { error: 100000 }
       - glob: "src/components/ui/**"
         lines: { error: 1000 }
       - glob: "**/*.md"

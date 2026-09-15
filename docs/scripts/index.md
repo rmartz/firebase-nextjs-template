@@ -5,6 +5,8 @@ Reference pages for the executables under `scripts/`. See
 
 - [capture-screenshots.mjs](capture-screenshots.md) — screenshot every Storybook story in Chromium for visual acceptance review.
 - [dependabot-audit.mjs](dependabot-audit.md) — classify every Dependabot PR's outcome and report per-group intervention rates.
+- [eval-edit-fragility.mjs](eval-edit-fragility.md) — join the edit-fragility score against mined ground truth, report correlation, and persist score snapshots.
+- [mine-edit-outcomes.mjs](mine-edit-outcomes.md) — mine agent transcripts for per-file Edit outcomes (anchor failures, retries, disambiguation-window sizes).
 - [update-config.sh](update-config.md) — update public deployment config, validate it, and optionally sync to Vercel.
 - [validate-anchor-uniqueness.mjs](validate-anchor-uniqueness.md) — report per-file edit fragility (anchor uniqueness); POC for the agent-legibility epic.
 - [validate-config.mjs](validate-config.md) — validate deployment config files against the schema.
