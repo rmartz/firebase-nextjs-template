@@ -5,3 +5,12 @@
 .claude
 src/components/ui
 pnpm-lock.yaml
+
+# >>> ai-tools managed (ensure-project-config) >>>
+node_modules/
+dist/
+.turbo/
+*.tsbuildinfo
+coverage/
+.git-worktrees/
+# <<< ai-tools managed (ensure-project-config) <<<
