@@ -132,10 +132,6 @@ jobs:
     if: needs.detect-changes.outputs.code_changed == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 2
-    # Best-effort commit of the score snapshot on main (see the persist step).
-    permissions:
-      contents: write
-      packages: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup
@@ -146,23 +142,6 @@ jobs:
           echo '```' >> "$GITHUB_STEP_SUMMARY"
           pnpm run --silent fragility:report | tee -a "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
-      # Persist the score distribution over time (#237). Runs ONLY on push to
-      # main (never on pull_request), so it cannot affect a PR's checks, and is
-      # best-effort — a failed append/commit must never break main.
-      - name: Persist score snapshot (main only)
-        if: github.event_name == 'push'
-        continue-on-error: true
-        run: |
-          pnpm run --silent fragility:snapshot
-          if git diff --quiet -- metrics/edit-fragility-history.jsonl; then
-            echo "No snapshot change to persist."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add metrics/edit-fragility-history.jsonl
-          git commit -m "chore: append edit-fragility score snapshot [skip ci]"
-          git push
 
   # Closed-input check: only package.json (and the validator itself) can affect
   # the result, so gate it on those changing rather than running every PR.

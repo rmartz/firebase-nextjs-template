@@ -116,6 +116,7 @@ function correlations(rows) {
   const window = rows.filter((r) => r.medianWindow > 0);
   return {
     n: rows.length,
+    nWindow: window.length,
     rhoWindow: spearman(window.map((r) => [r.fragility, r.medianWindow])),
     rhoFailure: spearman(rows.map((r) => [r.fragility, r.failures])),
     failures: rows.reduce((n, r) => n + r.failures, 0),
@@ -162,8 +163,8 @@ function report(rows) {
   }
   console.log(
     `\n  Spearman rho (fragility vs disambiguation-window size):` +
-      `\n    all files      n=${all.n}  rho=${fmt(all.rhoWindow)}` +
-      `\n    source only    n=${source.n}  rho=${fmt(source.rhoWindow)}`,
+      `\n    all files      n=${all.nWindow}/${all.n}  rho=${fmt(all.rhoWindow)}` +
+      `\n    source only    n=${source.nWindow}/${source.n}  rho=${fmt(source.rhoWindow)}`,
   );
   console.log(
     `  Spearman rho (fragility vs anchor-failure count): rho=${fmt(all.rhoFailure)} over ${all.failures} total failure(s)`,
