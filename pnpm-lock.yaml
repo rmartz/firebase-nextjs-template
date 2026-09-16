@@ -58,8 +58,8 @@ importers:
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.10.0(jiti@2.7.0))
       '@rmartz/repo-hygiene':
-        specifier: ^0.4.0
-        version: 0.4.0
+        specifier: ^1.0.0
+        version: 1.0.0
       '@storybook/addon-a11y':
         specifier: ^10.6.0
         version: 10.6.0(storybook@10.6.0(@types/react@19.3.0)(prettier@3.9.6)(react@19.3.0))
@@ -1589,11 +1589,9 @@ packages:
       react-redux:
         optional: true
 
-  '@rmartz/agent-runtime@0.1.1':
-    resolution: {integrity: sha512-wAIj6pgB9sITz6tzgMeHKrm8mWLa1sDqLx8KnBnG0zlf7GVVGqt+aDo6UR5ulZ284O4hoAwYmh7azwCGNkCepQ==, tarball: https://npm.pkg.github.com/download/@rmartz/agent-runtime/0.1.1/4dd9709474c950d845d94d03adf825d7e427f9b2}
-
-  '@rmartz/repo-hygiene@0.4.0':
-    resolution: {integrity: sha512-TC6bSb+W2N8iQKZ6WPgkcItEuvunEfTzb2e4kR+MOsFLQ4dhd1ENHNRnA5wdMnrc8lLyLxvdYMtO8WPBm56f3w==, tarball: https://npm.pkg.github.com/download/@rmartz/repo-hygiene/0.4.0/1eda819d3130ede4e2461372161db9df2cd32042}
+  '@rmartz/repo-hygiene@1.0.0':
+    resolution: {integrity: sha512-kgEAVOSUUNaTB+FuN/x8EX0wClLnY0S5nkQjWUhPSXIz/YyhzwQqeGAZjMv5av7Yy3lKvmXHjyhRv4pD8AzP0A==, tarball: https://npm.pkg.github.com/download/@rmartz/repo-hygiene/1.0.0/7d5bf9cce688c57191d857f0e89c1eb14fbff42c}
+    engines: {node: '>=20.11.0'}
     hasBin: true
 
   '@rolldown/binding-android-arm-eabi@1.2.8':
@@ -7118,11 +7116,8 @@ snapshots:
       react: 19.3.0
       react-redux: 9.3.0(@types/react@19.3.0)(react@19.3.0)(redux@5.0.1)
 
-  '@rmartz/agent-runtime@0.1.1': {}
-
-  '@rmartz/repo-hygiene@0.4.0':
+  '@rmartz/repo-hygiene@1.0.0':
     dependencies:
-      '@rmartz/agent-runtime': 0.1.1
       gray-matter: 4.0.3
       picomatch: 4.0.7
       yaml: 2.9.1

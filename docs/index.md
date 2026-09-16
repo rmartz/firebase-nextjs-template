@@ -20,7 +20,8 @@ by following links from this file down. Start here:
 - [Subsystems](subsystems/index.md) — reference pages for cohesive areas of the
   codebase.
 
-The OKF frontmatter of these pages is enforced in CI by the Hygiene job
-(`@rmartz/repo-hygiene`'s `okf` check — run locally with `pnpm run hygiene`).
+The OKF frontmatter of these pages, and this index tree's navigability, are
+enforced in CI by the Repo Hygiene workflow (`@rmartz/repo-hygiene`'s `okf` and
+`okf-index` checks — run locally with `pnpm run hygiene`).
 See [the OKF format](okf-format.md) and
 [the repo-hygiene subsystem](subsystems/repo-hygiene.md).
