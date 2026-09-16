@@ -49,6 +49,7 @@ works:
    pnpm format:check
    pnpm test
    pnpm build
+   pnpm run hygiene
    ```
 
 4. Push your branch and open a PR against `main`.
@@ -83,13 +84,13 @@ No `feat:`/`fix:` conventional commit prefixes.
 
 Every PR runs several parallel checks via GitHub Actions:
 
-| Check   | Command             | Must Pass           |
-| ------- | ------------------- | ------------------- |
-| Tests   | `pnpm test`         | Yes                 |
-| Lint    | `pnpm lint`         | Yes (zero warnings) |
-| Format  | `pnpm format:check` | Yes                 |
-| Build   | `pnpm build`        | Yes                 |
-| Hygiene | `pnpm run hygiene`  | Yes                 |
+| Check        | Command / mechanism                                                    | Must Pass           |
+| ------------ | ---------------------------------------------------------------------- | ------------------- |
+| Tests        | `pnpm test`                                                            | Yes                 |
+| Lint         | `pnpm lint`                                                            | Yes (zero warnings) |
+| Format       | `pnpm format:check`                                                    | Yes                 |
+| Build        | `pnpm build`                                                           | Yes                 |
+| Repo Hygiene | `@rmartz/repo-hygiene` reusable workflow (locally: `pnpm run hygiene`) | Yes                 |
 
 ## Storybook
 

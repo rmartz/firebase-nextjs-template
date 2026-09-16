@@ -1,32 +1,25 @@
-# >>> ai-tools managed (ensure-project-config) — do not edit by hand >>>
-# Source of truth: @rmartz/bootstrap golden workflow files. Re-run the
-# /bootstrap skill (ai-ensure-project-config) to re-sync; local edits are lost.
+name: Repo Hygiene
 
-name: repo-hygiene
+# @rmartz/repo-hygiene quality gates, run via its published reusable workflow.
+# The `@<sha>` pin is kept current by Dependabot's github-actions ecosystem, so
+# new checks and fixes propagate with no edit here. Per-check settings live in
+# .repo-hygiene.yml (passed as `config`); the local `pnpm run hygiene:staged`
+# pre-commit run is a fast-feedback companion to this CI gate.
+#
+# `checks` is explicit because the reusable workflow's default runs only the
+# default-on set (conflict-markers, action-pins); the rest are opt-in.
 
 on:
   pull_request:
   push:
     branches: [main]
 
-permissions:
-  contents: read
-  packages: read
-
-env:
-  REPO_HYGIENE_VERSION: 0.4.0
-
 jobs:
-  action-pins:
-    name: GitHub Actions SHA pins
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Install ai-repo-hygiene
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          printf '@rmartz:registry=https://npm.pkg.github.com\n//npm.pkg.github.com/:_authToken=%s\n' "${NODE_AUTH_TOKEN}" > ~/.npmrc
-          npm install -g "@rmartz/repo-hygiene@${REPO_HYGIENE_VERSION}"
-      - run: ai-repo-hygiene action-pins --check
+  hygiene:
+    permissions:
+      contents: read
+      packages: read
+    uses: rmartz/repo-hygiene/.github/workflows/hygiene.yml@9bea45565355ea99e4669ca2b8db8c8badf21a1b # v1.0.0
+    with:
+      checks: conflict-markers action-pins md-pairing okf okf-index file-caps
+      config: .repo-hygiene.yml

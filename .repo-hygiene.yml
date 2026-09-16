@@ -1,21 +1,26 @@
-# Repository hygiene gates, enforced by @rmartz/repo-hygiene — via the `hygiene`
-# / `hygiene:staged` package scripts, the pre-commit hooks, and the Hygiene CI
-# job. All five shipped checks run by default (naming none runs every builtin):
+# Repository hygiene gates, enforced by @rmartz/repo-hygiene. In CI they run via
+# the reusable workflow (.github/workflows/repo-hygiene.yml); locally the
+# `hygiene` / `hygiene:staged` package scripts and the pre-commit hooks run the
+# same set. The enabled checks are named explicitly (in both the workflow and
+# the scripts) — the package's default runs only conflict-markers + action-pins,
+# so the opt-in checks below must be listed to run:
 #
 #   - conflict-markers  merge-conflict markers in tracked/staged content
 #   - action-pins       every GitHub Action pinned to a SHA + full-semver comment
 #   - md-pairing        AGENTS.md / CLAUDE.md travel together, as real files
-#   - okf               OKF frontmatter conformance for docs/ pages (see below)
+#   - okf               OKF frontmatter conformance for docs/ content pages (see below)
+#   - okf-index         docs/ index-tree navigability (every dir has an index.md,
+#                       every content page and sub-index is linked from it)
 #   - file-caps         per-glob line/byte size caps (see below)
 #
-# Only checks that need settings appear below; the rest use their defaults.
+# Only checks that need settings appear below; the rest use their defaults
+# (okf-index defaults — roots [docs], indexName index.md — already match).
 #
 # This template consolidated its previously-bespoke check scripts onto the
 # shared package. Where a centralized check does not yet cover a rule the old
 # local script enforced, an ai-tools issue tracks the gap — when it lands, bump
 # the dependency to inherit the coverage (no template change needed):
 #   - okf optional field families (status/timestamps/actors/…): rmartz/ai-tools#202
-#   - okf index-tree navigability + index-page frontmatter rules: rmartz/ai-tools#200
 #   - md-pairing bare `@AGENTS.md` wrapper content: rmartz/ai-tools#203
 #
 # Zero-soft-tier stance (mirrors `eslint --max-warnings 0`): every tier is an
@@ -25,9 +30,9 @@ checks:
     types: [Script, Subsystem]
     roots: [docs]
     # Index pages are the OKF directory index and carry no content frontmatter,
-    # so they are out of content-page scope. (`exempt` is an exact-path list, not
-    # globs; a new docs subdirectory's index.md must be added here until the
-    # package handles index pages natively — rmartz/ai-tools#200.)
+    # so they are exempt from okf's content-page scope (their presence and
+    # linkage is enforced by okf-index instead). `exempt` is an exact-path list,
+    # not globs, so a new docs subdirectory's index.md must be added here.
     exempt:
       - docs/index.md
       - docs/scripts/index.md

@@ -16,32 +16,39 @@ wiring so every generated repo inherits enforcement at zero per-repo setup.
 
 ## Checks
 
-All five shipped checks run by default (the CLI runs every builtin when none is
-named). Configuration lives in [`.repo-hygiene.yml`](../../.repo-hygiene.yml):
+Six checks are enabled, named explicitly in both the CI workflow and the
+`hygiene` scripts — the package's default set is only `conflict-markers` +
+`action-pins`, so the rest are opt-in. Configuration lives in
+[`.repo-hygiene.yml`](../../.repo-hygiene.yml):
 
-| Check              | Enforces                                                                  |
-| ------------------ | ------------------------------------------------------------------------- |
-| `conflict-markers` | No merge-conflict markers in tracked/staged content.                      |
-| `action-pins`      | Every GitHub Action pinned to a commit SHA with a full-semver comment.    |
-| `md-pairing`       | `AGENTS.md` and `CLAUDE.md` travel together as real files (not symlinks). |
-| `okf`              | OKF frontmatter conformance for `docs/` content pages.                    |
-| `file-caps`        | Per-glob line-size caps (born-green, no baseline).                        |
+| Check              | Enforces                                                                                                         |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| `conflict-markers` | No merge-conflict markers in tracked/staged content.                                                             |
+| `action-pins`      | Every GitHub Action pinned to a commit SHA with a full-semver comment.                                           |
+| `md-pairing`       | `AGENTS.md` and `CLAUDE.md` travel together as real files (not symlinks).                                        |
+| `okf`              | OKF frontmatter conformance for `docs/` content pages.                                                           |
+| `okf-index`        | `docs/` index-tree navigability: every directory has an `index.md` that links its content pages and sub-indexes. |
+| `file-caps`        | Per-glob line-size caps (born-green, no baseline).                                                               |
 
 Only `okf` (the `Script` / `Subsystem` vocabulary, the docs roots, and the
 `index.md` exemptions) and `file-caps` (the ordered per-glob caps) need
-settings; the other three run on their defaults.
+settings; the other four run on their defaults.
 
 ## Wiring
 
-- **Package scripts** — `pnpm run hygiene` (`ai-repo-hygiene --check`, the CI
-  backstop over all tracked files) and `pnpm run hygiene:staged`
-  (`ai-repo-hygiene --staged`, the commit-time scan over staged blobs).
+- **Package scripts** — `pnpm run hygiene` (all tracked files) and
+  `pnpm run hygiene:staged` (the commit-time scan over staged blobs). Both name
+  the enabled checks explicitly and pass `--config .repo-hygiene.yml` — the
+  package's bare default would run only `conflict-markers` + `action-pins`.
 - **Pre-commit** — `.husky/pre-commit` (human commits) and
   `claude/hooks/pre-commit` (agent commits in worktrees) both run
-  `ai-repo-hygiene --staged`.
-- **CI** — the **Hygiene** job in
-  [`ci-actions.yml`](../../.github/workflows/ci-actions.yml) runs
-  `pnpm run hygiene`.
+  `pnpm run hygiene:staged`.
+- **CI** — [`repo-hygiene.yml`](../../.github/workflows/repo-hygiene.yml) calls
+  the published [`@rmartz/repo-hygiene`](https://github.com/rmartz/repo-hygiene)
+  reusable workflow (SHA-pinned, kept current by Dependabot's github-actions
+  ecosystem), which installs and runs the CLI over all tracked files. CI needs
+  no local devDependency; the devDependency backs only the local scripts and the
+  pre-commit run.
 
 ## GitHub Packages authentication
 
@@ -56,12 +63,13 @@ scope at `npm.pkg.github.com` and reads a `NODE_AUTH_TOKEN`:
 ## Consolidation status
 
 This template previously enforced several of these rules with bespoke scripts
-under `scripts/`; those were retired in favor of the shared package. A few rules
-the old scripts covered are not yet in the centralized checks — tracked as
+under `scripts/`; those were retired in favor of the shared package. The
+`okf-index` check (added in `@rmartz/repo-hygiene` v1.0.0) is the centralized
+port of the old `validate-docs-index.mjs`, closing the index-navigability gap.
+A couple of rules the old scripts covered are not yet centralized — tracked as
 enhancement issues so that adopting them is a dependency bump, not a re-port:
 
 - OKF optional field-family validation — [rmartz/ai-tools#202](https://github.com/rmartz/ai-tools/issues/202)
-- OKF index-tree navigability + index-page frontmatter rules — [rmartz/ai-tools#200](https://github.com/rmartz/ai-tools/issues/200)
 - `md-pairing` bare `@AGENTS.md` wrapper content — [rmartz/ai-tools#203](https://github.com/rmartz/ai-tools/issues/203)
 
 ## Related

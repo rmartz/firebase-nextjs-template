@@ -109,18 +109,9 @@ jobs:
       - uses: ./.github/actions/setup
       - run: pnpm run format:check
 
-  # Repo-hygiene gates via @rmartz/repo-hygiene: conflict markers, GitHub Action
-  # SHA pins, AGENTS.md/CLAUDE.md pairing, OKF frontmatter, and file-size caps.
-  # Cross-cutting across many file types, so it runs on every PR; configured in
-  # .repo-hygiene.yml.
-  hygiene:
-    name: Hygiene
-    runs-on: ubuntu-latest
-    timeout-minutes: 2
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/setup
-      - run: pnpm run hygiene
+  # Repo-hygiene gates (conflict markers, action pins, AGENTS/CLAUDE pairing, OKF
+  # frontmatter + index navigability, file caps) run via @rmartz/repo-hygiene's
+  # published reusable workflow — see .github/workflows/repo-hygiene.yml.
 
   # Agent-legibility metrics (epic #161). REPORT-ONLY: this job always passes; it
   # prints the edit-fragility (anchor-uniqueness) table to the log and the PR's
