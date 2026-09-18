@@ -1,0 +1,13 @@
+name: bot-automerge
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, labeled]
+permissions:
+  contents: write # enable GitHub-native auto-merge on the PR
+  pull-requests: write # read PR metadata + turn on auto-merge
+jobs:
+  bot-automerge:
+    uses: rmartz/bot-automerge/.github/workflows/bot-automerge.yml@53d53a17fce13eba215ef50f483cdca626512bfe # v0.1.0
+    with:
+      pr: ${{ github.event.pull_request.number }}
+    secrets: inherit
