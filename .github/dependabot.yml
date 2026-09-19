@@ -4,6 +4,10 @@ version: 2
 # token with `read:packages`) — ideally an organization-level Dependabot secret so
 # every repo generated from this template inherits it. Without the secret,
 # Dependabot cannot propose @rmartz/* updates; other npm updates are unaffected.
+#
+# The `.npmrc` at the repo root pins npmjs as the explicit base registry so that
+# public deps resolve there and not against GitHub Packages — see that file and
+# dependabot-core#15415 for why (pnpm 11.8+ does not fall back across registries).
 registries:
   github-packages:
     type: npm-registry
