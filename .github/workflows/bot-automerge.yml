@@ -5,6 +5,7 @@ on:
 permissions:
   contents: write # enable GitHub-native auto-merge on the PR
   pull-requests: write # read PR metadata + turn on auto-merge
+  packages: read # install the CLI from GitHub Packages (reusable workflow requires it)
 jobs:
   bot-automerge:
     uses: rmartz/bot-automerge/.github/workflows/bot-automerge.yml@53d53a17fce13eba215ef50f483cdca626512bfe # v0.1.0
