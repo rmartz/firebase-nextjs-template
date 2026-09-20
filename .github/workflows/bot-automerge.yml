@@ -1,14 +1,26 @@
 name: bot-automerge
+
+# Enables GitHub-native auto-merge for trusted bot PRs (Dependabot patch/minor,
+# release-please releases) via the rmartz/bot-automerge-action composite Action
+# (the successor to the reusable bot-automerge.yml workflow). A composite Action
+# can't declare its own triggers or use `secrets: inherit`, so this caller owns
+# the pull_request_target trigger and the write scopes. The `@<sha>` pin is kept
+# current by Dependabot's github-actions ecosystem.
 on:
   pull_request_target:
     types: [opened, reopened, synchronize, labeled]
+
 permissions:
   contents: write # enable GitHub-native auto-merge on the PR
   pull-requests: write # read PR metadata + turn on auto-merge
-  packages: read # install the CLI from GitHub Packages (reusable workflow requires it)
+  packages: read # install the CLI from GitHub Packages
+
 jobs:
   bot-automerge:
-    uses: rmartz/bot-automerge/.github/workflows/bot-automerge.yml@53d53a17fce13eba215ef50f483cdca626512bfe # v0.1.0
-    with:
-      pr: ${{ github.event.pull_request.number }}
-    secrets: inherit
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: rmartz/bot-automerge-action@7acd74697ddcce0319ca0d6733681dc76d4e60d6 # v1.0.0
+        with:
+          pr: ${{ github.event.pull_request.number }}
