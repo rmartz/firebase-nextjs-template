@@ -1,25 +1,31 @@
 name: Repo Hygiene
 
-# @rmartz/repo-hygiene quality gates, run via its published reusable workflow.
-# The `@<sha>` pin is kept current by Dependabot's github-actions ecosystem, so
-# new checks and fixes propagate with no edit here. Per-check settings live in
+# @rmartz/repo-hygiene quality gates, run via the rmartz/repo-hygiene-action
+# composite Action (the successor to the reusable hygiene.yml workflow). The
+# `@<sha>` pin is kept current by Dependabot's github-actions ecosystem, so new
+# checks and fixes propagate with no edit here. Per-check settings live in
 # .repo-hygiene.yml (passed as `config`); the local `pnpm run hygiene:staged`
 # pre-commit run is a fast-feedback companion to this CI gate.
 #
-# `checks` is explicit because the reusable workflow's default runs only the
-# default-on set (conflict-markers, action-pins); the rest are opt-in.
+# `checks` is explicit because the Action's default runs only the default-on set
+# (conflict-markers, action-pins); the rest are opt-in.
 
 on:
   pull_request:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+  packages: read
+
 jobs:
   hygiene:
-    permissions:
-      contents: read
-      packages: read
-    uses: rmartz/repo-hygiene/.github/workflows/hygiene.yml@9bea45565355ea99e4669ca2b8db8c8badf21a1b # v1.0.0
-    with:
-      checks: conflict-markers action-pins md-pairing okf okf-index file-caps
-      config: .repo-hygiene.yml
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: rmartz/repo-hygiene-action@66118369122afacf29241703137f60cbfa0315f0 # v1.0.0
+        with:
+          checks: conflict-markers action-pins md-pairing okf okf-index file-caps
+          config: .repo-hygiene.yml
