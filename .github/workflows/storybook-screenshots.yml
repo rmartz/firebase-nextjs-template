@@ -1,0 +1,36 @@
+name: Storybook Screenshots
+
+# Advisory per-PR screenshot gallery, delegated to the shared rmartz/storybook-ci
+# reusable workflow (POC consumer — issue #253). It builds Storybook, screenshots
+# the stories a PR's changes touch, and posts them as one update-in-place PR
+# comment whose images are GitHub user-attachments uploaded by `gh --attach` —
+# replacing the download-the-artifact surface this repo used before (#131).
+#
+# The advisory isolation (`continue-on-error`), per-PR concurrency, fork-skip,
+# capture deadline, and change gating all live in the shared workflow, so no
+# `concurrency` or `continue-on-error` block belongs here.
+#
+# `secrets: inherit` forwards STORYBOOK_SCREENSHOT_PAT — a classic PAT (`repo`
+# scope), required because the user-attachments upload endpoint rejects the Actions
+# GITHUB_TOKEN. Until that secret exists the capture step logs why and exits 0, so
+# this workflow is harmless (just inert) without it. The whole job is skipped on
+# fork PRs so the PAT never reaches fork-authored code.
+#
+# This is advisory and never a required check, so unlike storybook-tests.yml it may
+# safely use an `on.paths` filter to stay off unrelated PRs.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/**"
+      - ".storybook/**"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  screenshots:
+    uses: rmartz/storybook-ci/.github/workflows/storybook-screenshots.yml@818ac4fb8844b517ed2d6d5508696a81c7b25802 # v1.0.0
+    secrets: inherit
