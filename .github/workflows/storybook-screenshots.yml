@@ -10,11 +10,12 @@ name: Storybook Screenshots
 # capture deadline, and change gating all live in the shared workflow, so no
 # `concurrency` or `continue-on-error` block belongs here.
 #
-# `secrets: inherit` forwards STORYBOOK_SCREENSHOT_PAT — a classic PAT (`repo`
-# scope), required because the user-attachments upload endpoint rejects the Actions
-# GITHUB_TOKEN. Until that secret exists the capture step logs why and exits 0, so
-# this workflow is harmless (just inert) without it. The whole job is skipped on
-# fork PRs so the PAT never reaches fork-authored code.
+# `secrets: inherit` forwards STORYBOOK_SCREENSHOT_PAT, required because the
+# user-attachments upload endpoint rejects the Actions GITHUB_TOKEN. As of v1.1.0 a
+# preflight step runs before the expensive Storybook build: when the PAT is missing
+# or invalid it posts one non-blocking advisory PR comment and skips the build and
+# capture, so a misconfigured PAT announces itself instead of looking like success.
+# The whole job is skipped on fork PRs so the PAT never reaches fork-authored code.
 #
 # This is advisory and never a required check, so unlike storybook-tests.yml it may
 # safely use an `on.paths` filter to stay off unrelated PRs.
@@ -32,5 +33,5 @@ permissions:
 
 jobs:
   screenshots:
-    uses: rmartz/storybook-ci/.github/workflows/storybook-screenshots.yml@818ac4fb8844b517ed2d6d5508696a81c7b25802 # v1.0.0
+    uses: rmartz/storybook-ci/.github/workflows/storybook-screenshots.yml@bf71383a729ac2fa5b965a203a13f0dafefb598e # v1.1.1
     secrets: inherit

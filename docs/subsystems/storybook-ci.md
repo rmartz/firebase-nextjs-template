@@ -43,11 +43,18 @@ update-in-place PR comment** whose images are GitHub user-attachments uploaded v
 `gh --attach`. There is no artifact to download, no orphan image branch, and no
 cleanup workflow.
 
-It requires **`STORYBOOK_SCREENSHOT_PAT`** — a classic PAT with `repo` scope,
-forwarded by `secrets: inherit` — because the user-attachments upload endpoint
-rejects the Actions `GITHUB_TOKEN`. When the secret is absent the capture step
-logs why and exits `0`, so the workflow is inert rather than red. The whole job is
-skipped on fork PRs so the PAT never reaches fork-authored code.
+It requires **`STORYBOOK_SCREENSHOT_PAT`**, forwarded by `secrets: inherit`,
+because the user-attachments upload endpoint rejects the Actions `GITHUB_TOKEN`
+(an installation token). Since v1.1.0 a **preflight** step runs before the
+expensive Storybook build: a missing or invalid PAT posts one non-blocking
+advisory PR comment and skips the build and capture, so a misconfigured PAT
+announces itself rather than resembling a clean run. The whole job is skipped on
+fork PRs so the PAT never reaches fork-authored code.
+
+Upstream documents the secret as a **classic** PAT with `repo` scope, on the basis
+that fine-grained PATs were never confirmed against the upload endpoint. As the POC
+consumer we are testing that assumption directly rather than inheriting it — see
+[rmartz/storybook-ci#12](https://github.com/rmartz/storybook-ci/issues/12).
 
 ## Required-check shape
 
