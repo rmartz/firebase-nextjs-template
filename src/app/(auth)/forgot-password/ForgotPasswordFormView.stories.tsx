@@ -32,6 +32,13 @@ export const WithError: Story = {
   },
 };
 
+export const WithInvalidEmailError: Story = {
+  args: {
+    email: "not-an-email",
+    error: FORGOT_PASSWORD_COPY.errors["auth/invalid-email"],
+  },
+};
+
 export const Loading: Story = {
   args: {
     email: "you@example.com",
