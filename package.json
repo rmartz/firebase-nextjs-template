@@ -17,7 +17,6 @@
     "format:check": "prettier --check .",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "screenshots": "node scripts/capture-screenshots.mjs",
     "prepare": "husky",
     "emulator": "firebase emulators:start",
     "hygiene": "ai-repo-hygiene conflict-markers action-pins md-pairing okf okf-index file-caps --check --config .repo-hygiene.yml",

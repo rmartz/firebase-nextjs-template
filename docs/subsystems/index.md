@@ -7,3 +7,4 @@ Reference pages for cohesive areas of the codebase. See
 - [Edit-fragility evaluation](edit-fragility-evaluation.md) — the harness that validates the edit-fragility metric against real agent edits, and the keep-or-kill finding it produced.
 - [merge-safety](merge-safety.md) — the advisory "must this PR be brought current before merge?" check, consuming ai-tools' published `@rmartz/pr-review` CLI.
 - [Repo hygiene](repo-hygiene.md) — the shared `@rmartz/repo-hygiene` quality gates (conflict markers, action pins, AGENTS/CLAUDE pairing, OKF frontmatter, file caps) and how they are wired.
+- [storybook-ci](storybook-ci.md) — the shared `rmartz/storybook-ci` reusable workflows behind this repo's gating Storybook tests and advisory per-PR screenshot gallery.

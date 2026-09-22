@@ -15,7 +15,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     outputs:
-      stories_changed: ${{ steps.classify.outputs.stories_changed }}
       package_changed: ${{ steps.classify.outputs.package_changed }}
       code_changed: ${{ steps.classify.outputs.code_changed }}
     steps:
@@ -26,7 +25,6 @@ jobs:
         name: Classify changed files
         run: |
           if [ "${{ github.event_name }}" != "pull_request" ]; then
-            echo "stories_changed=true" >> "$GITHUB_OUTPUT"
             echo "package_changed=true" >> "$GITHUB_OUTPUT"
             echo "workflows_changed=true" >> "$GITHUB_OUTPUT"
             echo "agents_changed=true" >> "$GITHUB_OUTPUT"
@@ -37,14 +35,6 @@ jobs:
           head="${{ github.sha }}"
           changed="$(git diff --name-only "$base"..."$head")"
           printf 'Changed files:\n%s\n' "$changed"
-          # A changed Storybook story implies an intended visual change worth
-          # validating with a fresh screenshot.
-          if printf '%s\n' "$changed" | grep -Eq '\.stories\.(ts|tsx)$'; then
-            stories_changed=true
-          else
-            stories_changed=false
-          fi
-          echo "stories_changed=$stories_changed" >> "$GITHUB_OUTPUT"
           # The pin-format check reads only package.json (plus its own validator),
           # so it need only run when one of those changes.
           if printf '%s\n' "$changed" | grep -Eq '(^|/)package\.json$|^scripts/validate-pins\.mjs$'; then
@@ -67,7 +57,7 @@ jobs:
             code_changed=false
           fi
           echo "code_changed=$code_changed" >> "$GITHUB_OUTPUT"
-          printf 'Resolved: stories_changed=%s package_changed=%s code_changed=%s\n' "$stories_changed" "$package_changed" "$code_changed"
+          printf 'Resolved: package_changed=%s code_changed=%s\n' "$package_changed" "$code_changed"
 
   tests:
     name: Tests
@@ -157,77 +147,3 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup
       - run: pnpm build
-
-  # Gating compile check for the production Storybook bundle. This is a distinct
-  # render surface from both the Next.js `build` job (different entrypoint and
-  # bundler) and the Vitest-based `storybook-tests` job (which renders stories
-  # through the addon-vitest transform and never runs `storybook build`). It is
-  # gated on the broad `code_changed` denylist — not `stories_changed` — so a
-  # `.storybook/` preset, preview decorator, or addon change that breaks the
-  # bundle is caught even when no `.stories.` file changed.
-  storybook-build:
-    name: Storybook Build
-    needs: detect-changes
-    if: needs.detect-changes.outputs.code_changed == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 4
-    env:
-      STORYBOOK_DISABLE_TELEMETRY: "1"
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/setup
-      - run: pnpm build-storybook
-
-  # Advisory visual-acceptance aid: captures a screenshot of every story and
-  # uploads them as an artifact. Runs only when a story changed (an intended
-  # visual change worth eyeballing); `continue-on-error` keeps it non-blocking.
-  # No concurrency group is needed — the artifact surface is per-run, so there
-  # is no shared resource for concurrent PR runs to race on.
-  storybook-screenshots:
-    name: Storybook Screenshots
-    needs: detect-changes
-    if: github.event_name == 'pull_request' && needs.detect-changes.outputs.stories_changed == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 8
-    continue-on-error: true
-    env:
-      STORYBOOK_DISABLE_TELEMETRY: "1"
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/setup
-      - uses: ./.github/actions/playwright-chromium
-      - name: Build Storybook
-        run: pnpm build-storybook
-      - name: Capture screenshots
-        # No step-level continue-on-error: a capture failure (a broken or slow
-        # story) must surface as a job *failure* so the coordinator routes it to
-        # fix-review. The script fails fast — stories run concurrently with a
-        # short per-story render budget and an overall wall-clock deadline below
-        # this job's timeout-minutes — so the job never hits its timeout and gets
-        # *cancelled* (which escalates to a human instead). The job-level
-        # continue-on-error above still keeps the failure non-blocking for the run.
-        run: node scripts/capture-screenshots.mjs
-      - name: Upload screenshots
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: storybook-screenshots
-          path: screenshots/
-          if-no-files-found: warn
-
-  # Runs the Storybook stories as Vitest browser tests in real Chromium. Isolated
-  # in its own job so only it pays the Playwright browser-install cost; the
-  # install is retried to absorb transient apt/CDN failures.
-  storybook-tests:
-    name: Storybook Tests
-    needs: detect-changes
-    if: needs.detect-changes.outputs.code_changed == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 8
-    env:
-      STORYBOOK_DISABLE_TELEMETRY: "1"
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/setup
-      - uses: ./.github/actions/playwright-chromium
-      - run: pnpm test:storybook
