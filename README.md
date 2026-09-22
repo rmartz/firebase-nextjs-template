@@ -64,7 +64,6 @@ pnpm test:storybook   # Run Storybook stories as browser tests (Chromium via Pla
 pnpm tsc              # Type check
 pnpm storybook        # Start Storybook dev server (port 6006)
 pnpm build-storybook  # Build static Storybook
-pnpm screenshots      # Screenshot every story for visual review (run after build-storybook)
 pnpm run env:validate # Validate deployment config files against schema (also runs on every commit)
 pnpm run hygiene      # Run @rmartz/repo-hygiene checks (conflict markers, action pins, pairing, OKF, file caps)
 ```
@@ -142,7 +141,9 @@ Secret rotation (Firebase service account, Sentry token) is handled by the `envc
 
 ### GitHub Actions
 
-CI runs automatically on every PR as parallel jobs in [`.github/workflows/ci-actions.yml`](.github/workflows/ci-actions.yml): Tests, Lint (which also enforces the JS/TS file-length hard cap via the eslint `max-lines` rule), Format, Type check, Hygiene ([`@rmartz/repo-hygiene`](docs/subsystems/repo-hygiene.md): conflict markers, action pins, `AGENTS.md`/`CLAUDE.md` pairing, OKF frontmatter, file caps), Build, and **Storybook Tests** (stories run as browser tests in Chromium). A **Storybook Screenshots** job additionally runs when a `*.stories.tsx` file changes — it captures a screenshot of every story and uploads them as a workflow artifact for visual review. It is advisory (`continue-on-error`), so it never blocks merge; download the `storybook-screenshots` artifact from the run to review.
+CI runs automatically on every PR as parallel jobs in [`.github/workflows/ci-actions.yml`](.github/workflows/ci-actions.yml): Tests, Lint (which also enforces the JS/TS file-length hard cap via the eslint `max-lines` rule), Format, Type check, Hygiene ([`@rmartz/repo-hygiene`](docs/subsystems/repo-hygiene.md): conflict markers, action pins, `AGENTS.md`/`CLAUDE.md` pairing, OKF frontmatter, file caps), and Build.
+
+Storybook CI lives in two thin caller workflows that delegate to the shared [`rmartz/storybook-ci`](docs/subsystems/storybook-ci.md) reusable workflows: **Storybook Tests** (stories run as browser tests in Chromium, plus a gating `build-storybook` compile check) and **Storybook Screenshots** (advisory — screenshots the stories a PR touches and posts them inline in one update-in-place PR comment, so there is no artifact to download).
 
 Additional workflows:
 
