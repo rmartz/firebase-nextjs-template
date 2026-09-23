@@ -29,9 +29,10 @@ on:
 
 permissions:
   contents: read
+  packages: read
   pull-requests: write
 
 jobs:
   screenshots:
-    uses: rmartz/storybook-ci/.github/workflows/storybook-screenshots.yml@bf71383a729ac2fa5b965a203a13f0dafefb598e # v1.1.1
+    uses: rmartz/storybook-ci/.github/workflows/storybook-screenshots.yml@731dada2cdeb712b5443c4e2b29a3065f90ffd81 # v1.2.1
     secrets: inherit

@@ -28,7 +28,7 @@ permissions:
 
 jobs:
   storybook-tests:
-    uses: rmartz/storybook-ci/.github/workflows/storybook-tests.yml@bf71383a729ac2fa5b965a203a13f0dafefb598e # v1.1.1
+    uses: rmartz/storybook-ci/.github/workflows/storybook-tests.yml@731dada2cdeb712b5443c4e2b29a3065f90ffd81 # v1.2.1
     with:
       # This repo runs its story suite through a dedicated Vitest config
       # (vitest.storybook.config.ts) rather than a `storybook` project inside
