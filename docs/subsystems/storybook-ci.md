@@ -51,10 +51,25 @@ advisory PR comment and skips the build and capture, so a misconfigured PAT
 announces itself rather than resembling a clean run. The whole job is skipped on
 fork PRs so the PAT never reaches fork-authored code.
 
-Upstream documents the secret as a **classic** PAT with `repo` scope, on the basis
-that fine-grained PATs were never confirmed against the upload endpoint. As the POC
-consumer we are testing that assumption directly rather than inheriting it — see
-[rmartz/storybook-ci#12](https://github.com/rmartz/storybook-ci/issues/12).
+`STORYBOOK_SCREENSHOT_PAT` is a **fine-grained** PAT scoped to this repository, and
+the only permission it needs is **`Pull requests: Read and Write`** (`Metadata:
+Read` is GitHub's mandatory baseline and is granted automatically). `Contents` is
+**not** required — `actions/checkout` clones with the job's `GITHUB_TOKEN`, and the
+PAT authenticates only `gh` for the attachment upload and comment write.
+
+Upstream originally documented a **classic** PAT with `repo` scope, on the untested
+assumption that fine-grained PATs do not work against the user-attachments endpoint.
+That was measured and disproved on 2026-09-22 against v1.2.0
+([storybook-ci#12](https://github.com/rmartz/storybook-ci/issues/12),
+[#16](https://github.com/rmartz/storybook-ci/issues/16)). Fine-grained is now the
+recommendation, and the reason matters: a classic `repo`-scoped PAT grants full
+read/write across **every** repository its owner can reach, where this one grants
+pull-request access to exactly one.
+
+**A green screenshots job does not prove the PAT works.** When a PR's changes
+resolve to zero stories the gate short-circuits _before_ the PAT is verified, so
+validating a PAT requires a PR that actually touches a story or a co-located
+component.
 
 ## Required-check shape
 
