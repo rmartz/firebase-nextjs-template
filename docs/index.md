@@ -23,5 +23,5 @@ by following links from this file down. Start here:
 The OKF frontmatter of these pages, and this index tree's navigability, are
 enforced in CI by the Repo Hygiene workflow (`@rmartz/repo-hygiene`'s `okf` and
 `okf-index` checks — run locally with `pnpm run hygiene`).
-See [the OKF format](okf-format.md) and
-[the repo-hygiene subsystem](subsystems/repo-hygiene.md).
+See [the OKF format](okf-format.md) and the repo-hygiene page under
+[Subsystems](subsystems/index.md).
