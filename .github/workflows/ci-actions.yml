@@ -7,7 +7,6 @@ on:
 
 permissions:
   contents: read
-  packages: read # setup composite installs @rmartz/repo-hygiene from GitHub Packages
 
 jobs:
   detect-changes:
