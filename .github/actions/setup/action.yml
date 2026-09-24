@@ -17,8 +17,3 @@ runs:
         cache: "pnpm"
     - run: pnpm install ${{ inputs.frozen-lockfile == 'true' && '--frozen-lockfile' || '--no-frozen-lockfile' }}
       shell: bash
-      # @rmartz/repo-hygiene resolves from GitHub Packages; .npmrc reads this
-      # token. `github.token` is the job's GITHUB_TOKEN — it carries the
-      # `packages: read` scope granted by the calling workflow's permissions.
-      env:
-        NODE_AUTH_TOKEN: ${{ github.token }}

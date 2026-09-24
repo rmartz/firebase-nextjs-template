@@ -32,7 +32,7 @@ titles.
 
 That issue retires the `pr-title-lint.yml` copy in every repo in favour of
 pr-policy's title check. This repo adopts the caller first to prove the
-mechanics end to end: installing the CLI from GitHub Packages, the
+mechanics end to end: the Action installing its pinned CLI, the
 `pull_request_target` token posting the check-run and labels on Dependabot and
 fork PRs, and re-evaluation on `edited` / `labeled` / `unlabeled`.
 

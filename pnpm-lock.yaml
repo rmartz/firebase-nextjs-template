@@ -1590,7 +1590,7 @@ packages:
         optional: true
 
   '@rmartz/repo-hygiene@7.0.1':
-    resolution: {integrity: sha512-nXxzYm/k/C5XcREcGkhQ7QV6KcRnhKPZnIrwkblG7JsJRPign8W1Ex+j2fRXR7W5vH17LcfbWhIBx8yAAicOmw==, tarball: https://npm.pkg.github.com/download/@rmartz/repo-hygiene/7.0.1/dd0ce82221080beb59cf788f941474b6a0ee547e}
+    resolution: {integrity: sha512-1p/3CgXWH4zoruUcg8QaeAR0KzevmVH2X8yiQzTw4e+QppsoonxyUwn24pRz/slC6u360E6Da1XMaJUMwRyO5A==}
     engines: {node: '>=20.11.0'}
     hasBin: true
 

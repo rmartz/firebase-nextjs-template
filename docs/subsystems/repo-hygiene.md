@@ -54,15 +54,13 @@ settings; the other five run on their defaults.
   through a symlink ([rmartz/repo-hygiene#67](https://github.com/rmartz/repo-hygiene/issues/67)),
   so never pin below v3.0.0.
 
-## GitHub Packages authentication
+## Installing the package
 
-`@rmartz/repo-hygiene` publishes to GitHub Packages, so `pnpm install` must
-authenticate wherever it runs. [`.npmrc`](../../.npmrc) points the `@rmartz`
-scope at `npm.pkg.github.com` and reads a `NODE_AUTH_TOKEN`:
-
-- **Locally**: `NODE_AUTH_TOKEN=$(gh auth token) pnpm install` (see
-  [CONTRIBUTING.md](../../CONTRIBUTING.md)).
-- **In CI**: the job's `GITHUB_TOKEN` with `permissions: packages: read`.
+`@rmartz/repo-hygiene` is public on npmjs, so `pnpm install` needs no token,
+locally or in CI. [`.npmrc`](../../.npmrc) pins the `@rmartz` scope to npmjs
+explicitly, so a user-level `.npmrc` that maps `@rmartz` to GitHub Packages
+(still used by other `@rmartz` packages) can't redirect the install. Versions up
+to 7.0.1 were also published to GitHub Packages; newer ones exist only on npmjs.
 
 ## Consolidation status
 
