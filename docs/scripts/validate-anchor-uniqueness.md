@@ -44,4 +44,4 @@ Each flagged file lists its top repeated lines (`x4  args: {`) so the fragility 
 
 ## Related
 
-- [validate-pins.mjs](validate-pins.md) — sibling standalone validator (it gates; this one reports).
+- [Repo hygiene](../subsystems/repo-hygiene.md) — the gating checks (including `package-pins`); this script only reports.

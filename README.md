@@ -33,10 +33,10 @@ A template repository for building Next.js applications with Firebase, deployed 
 
 1. Click **"Use this template"** on GitHub to create a new repository
 2. Clone your new repository
-3. Install dependencies (`@rmartz/repo-hygiene` is published to GitHub Packages, so
-   `pnpm install` needs a `read:packages` token — see [CONTRIBUTING.md](CONTRIBUTING.md)):
+3. Install dependencies (no token needed — every package, including
+   `@rmartz/repo-hygiene`, is public on npmjs):
    ```bash
-   NODE_AUTH_TOKEN=$(gh auth token) pnpm install
+   pnpm install
    ```
 4. Copy the environment template and fill in your Firebase credentials:
    ```bash

@@ -58,8 +58,8 @@ importers:
         specifier: 10.0.1
         version: 10.0.1(eslint@10.10.0(jiti@2.7.0))
       '@rmartz/repo-hygiene':
-        specifier: 1.0.0
-        version: 1.0.0
+        specifier: 7.0.1
+        version: 7.0.1
       '@storybook/addon-a11y':
         specifier: 10.6.0
         version: 10.6.0(storybook@10.6.0(@types/react@19.3.0)(prettier@3.9.6)(react@19.3.0))
@@ -1589,8 +1589,8 @@ packages:
       react-redux:
         optional: true
 
-  '@rmartz/repo-hygiene@1.0.0':
-    resolution: {integrity: sha512-kgEAVOSUUNaTB+FuN/x8EX0wClLnY0S5nkQjWUhPSXIz/YyhzwQqeGAZjMv5av7Yy3lKvmXHjyhRv4pD8AzP0A==, tarball: https://npm.pkg.github.com/download/@rmartz/repo-hygiene/1.0.0/7d5bf9cce688c57191d857f0e89c1eb14fbff42c}
+  '@rmartz/repo-hygiene@7.0.1':
+    resolution: {integrity: sha512-1p/3CgXWH4zoruUcg8QaeAR0KzevmVH2X8yiQzTw4e+QppsoonxyUwn24pRz/slC6u360E6Da1XMaJUMwRyO5A==}
     engines: {node: '>=20.11.0'}
     hasBin: true
 
@@ -7116,7 +7116,7 @@ snapshots:
       react: 19.3.0
       react-redux: 9.3.0(@types/react@19.3.0)(react@19.3.0)(redux@5.0.1)
 
-  '@rmartz/repo-hygiene@1.0.0':
+  '@rmartz/repo-hygiene@7.0.1':
     dependencies:
       gray-matter: 4.0.3
       picomatch: 4.0.7
