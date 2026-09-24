@@ -9,23 +9,19 @@ Guidelines for contributing to projects built from this template.
 
 ## Setup
 
-This project depends on [`@rmartz/repo-hygiene`](https://github.com/rmartz/ai-tools),
-published to GitHub Packages, so `pnpm install` must authenticate. Provide a
-`NODE_AUTH_TOKEN` with `read:packages` scope — the simplest source is your `gh`
-token:
+Every dependency, including
+[`@rmartz/repo-hygiene`](https://github.com/rmartz/repo-hygiene), is public on
+npmjs, so `pnpm install` needs no token:
 
 ```bash
-NODE_AUTH_TOKEN=$(gh auth token) pnpm install
+pnpm install
 cp .env.example .env.local  # Fill in your Firebase credentials
 pnpm dev
 ```
 
-Alternatively, add the token to your global `~/.npmrc` so plain `pnpm install`
-works:
-
-```
-//npm.pkg.github.com/:_authToken=<a token with read:packages>
-```
+The repo's `.npmrc` pins the `@rmartz` scope to npmjs, so a global `~/.npmrc` that
+maps `@rmartz` to GitHub Packages (for other `@rmartz` packages) doesn't redirect
+this install.
 
 ## Development Workflow
 

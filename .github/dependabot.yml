@@ -1,23 +1,13 @@
 version: 2
-# @rmartz/repo-hygiene publishes to GitHub Packages, so Dependabot needs registry
-# auth to see new versions. Set a Dependabot secret DEPENDABOT_PACKAGES_TOKEN (a
-# token with `read:packages`) — ideally an organization-level Dependabot secret so
-# every repo generated from this template inherits it. Without the secret,
-# Dependabot cannot propose @rmartz/* updates; other npm updates are unaffected.
+# Every npm dependency here — including @rmartz/repo-hygiene — is public on npmjs,
+# so Dependabot needs no registry block or DEPENDABOT_PACKAGES_TOKEN secret.
 #
-# The `.npmrc` at the repo root pins npmjs as the explicit base registry so that
-# public deps resolve there and not against GitHub Packages — see that file and
-# dependabot-core#15415 for why (pnpm 11.8+ does not fall back across registries).
-registries:
-  github-packages:
-    type: npm-registry
-    url: https://npm.pkg.github.com
-    token: ${{secrets.DEPENDABOT_PACKAGES_TOKEN}}
+# The `.npmrc` at the repo root pins npmjs as the explicit base registry (and the
+# @rmartz scope) — see that file and dependabot-core#15415 for why (pnpm 11.8+
+# does not fall back across registries).
 updates:
   - package-ecosystem: npm
     directory: /
-    registries:
-      - github-packages
     schedule:
       interval: weekly
     # NOTE: no `cooldown` — do not re-add it (for either ecosystem). It adds
