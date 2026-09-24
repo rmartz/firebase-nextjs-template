@@ -14,7 +14,9 @@
   Prettier minor bump can reformat the codebase and surface only as an unexplained CI
   failure. Full pins force Dependabot to rewrite the specifier on every bump, keeping
   dependency updates explicit in the manifest. (`github:`, `workspace:`, `file:`, and
-  `link:` specifiers are exempt — they carry no semver range.)
+  `link:` specifiers are exempt — they carry no semver range.) Enforced by
+  `@rmartz/repo-hygiene`'s `package-pins` check (`pnpm run hygiene` / the **Repo
+  Hygiene** workflow).
 
 - **Pin GitHub Actions to a commit SHA.** Every third-party action in
   `.github/workflows/*.yml` and `.github/actions/*/action.yml` must pin the full
@@ -40,7 +42,6 @@ pnpm tsc              # Type check
 pnpm storybook        # Start Storybook dev server (port 6006)
 pnpm build-storybook  # Build static Storybook
 pnpm run env:validate # Validate deployment config files against schema (also runs pre-commit)
-pnpm run pins:validate # Check package.json pins are full [major].[minor].[patch] versions
 pnpm run hygiene      # Run all @rmartz/repo-hygiene checks over tracked files
 pnpm run hygiene:staged # Run the hygiene checks over staged content (pre-commit)
 ```

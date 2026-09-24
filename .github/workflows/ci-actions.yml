@@ -15,7 +15,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     outputs:
-      package_changed: ${{ steps.classify.outputs.package_changed }}
       code_changed: ${{ steps.classify.outputs.code_changed }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -25,7 +24,6 @@ jobs:
         name: Classify changed files
         run: |
           if [ "${{ github.event_name }}" != "pull_request" ]; then
-            echo "package_changed=true" >> "$GITHUB_OUTPUT"
             echo "workflows_changed=true" >> "$GITHUB_OUTPUT"
             echo "agents_changed=true" >> "$GITHUB_OUTPUT"
             echo "code_changed=true" >> "$GITHUB_OUTPUT"
@@ -35,14 +33,6 @@ jobs:
           head="${{ github.sha }}"
           changed="$(git diff --name-only "$base"..."$head")"
           printf 'Changed files:\n%s\n' "$changed"
-          # The pin-format check reads only package.json (plus its own validator),
-          # so it need only run when one of those changes.
-          if printf '%s\n' "$changed" | grep -Eq '(^|/)package\.json$|^scripts/validate-pins\.mjs$'; then
-            package_changed=true
-          else
-            package_changed=false
-          fi
-          echo "package_changed=$package_changed" >> "$GITHUB_OUTPUT"
           # Documentation denylist: run the heavy jobs by default, skip only when
           # EVERY changed file is provably-inert docs (.md / .txt / LICENSE). A new
           # or unanticipated file type fails safe (runs the suite) rather than open.
@@ -57,7 +47,7 @@ jobs:
             code_changed=false
           fi
           echo "code_changed=$code_changed" >> "$GITHUB_OUTPUT"
-          printf 'Resolved: package_changed=%s code_changed=%s\n' "$package_changed" "$code_changed"
+          printf 'Resolved: code_changed=%s\n' "$code_changed"
 
   tests:
     name: Tests
@@ -99,9 +89,9 @@ jobs:
       - uses: ./.github/actions/setup
       - run: pnpm run format:check
 
-  # Repo-hygiene gates (conflict markers, action pins, AGENTS/CLAUDE pairing, OKF
-  # frontmatter + index navigability, file caps) run via @rmartz/repo-hygiene's
-  # published reusable workflow — see .github/workflows/repo-hygiene.yml.
+  # Repo-hygiene gates (conflict markers, action pins, package.json pins,
+  # AGENTS/CLAUDE pairing, OKF frontmatter + index navigability, file caps) run
+  # via rmartz/repo-hygiene-action — see .github/workflows/repo-hygiene.yml.
 
   # Agent-legibility metrics (epic #161). REPORT-ONLY: this job always passes; it
   # prints the edit-fragility (anchor-uniqueness) table to the log and the PR's
@@ -123,19 +113,6 @@ jobs:
           echo '```' >> "$GITHUB_STEP_SUMMARY"
           pnpm run --silent fragility:report | tee -a "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
-
-  # Closed-input check: only package.json (and the validator itself) can affect
-  # the result, so gate it on those changing rather than running every PR.
-  pins:
-    name: Pin format
-    needs: detect-changes
-    if: needs.detect-changes.outputs.package_changed == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 2
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/setup
-      - run: pnpm run pins:validate
 
   build:
     name: Build
