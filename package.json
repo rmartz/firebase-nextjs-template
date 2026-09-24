@@ -19,14 +19,13 @@
     "build-storybook": "storybook build",
     "prepare": "husky",
     "emulator": "firebase emulators:start",
-    "hygiene": "ai-repo-hygiene conflict-markers action-pins md-pairing okf okf-index file-caps --check --config .repo-hygiene.yml",
-    "hygiene:staged": "ai-repo-hygiene conflict-markers action-pins md-pairing okf okf-index file-caps --staged --config .repo-hygiene.yml",
+    "hygiene": "ai-repo-hygiene conflict-markers action-pins package-pins md-pairing okf okf-index file-caps --check --config .repo-hygiene.yml",
+    "hygiene:staged": "ai-repo-hygiene conflict-markers action-pins package-pins md-pairing okf okf-index file-caps --staged --config .repo-hygiene.yml",
     "fragility:report": "node scripts/validate-anchor-uniqueness.mjs",
     "fragility:mine": "node scripts/mine-edit-outcomes.mjs",
     "fragility:eval": "node scripts/eval-edit-fragility.mjs",
     "fragility:snapshot": "node scripts/eval-edit-fragility.mjs --snapshot metrics/edit-fragility-history.jsonl",
-    "env:validate": "node scripts/validate-config.mjs",
-    "pins:validate": "node scripts/validate-pins.mjs"
+    "env:validate": "node scripts/validate-config.mjs"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

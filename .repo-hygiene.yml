@@ -7,6 +7,9 @@
 #
 #   - conflict-markers  merge-conflict markers in tracked/staged content
 #   - action-pins       every GitHub Action pinned to a SHA + full-semver comment
+#   - package-pins      every package.json dependency pinned to a full
+#                       [major].[minor].[patch] base (replaces the old local
+#                       scripts/validate-pins.mjs + "Pin format" CI job)
 #   - md-pairing        AGENTS.md / CLAUDE.md travel together, as real files
 #   - okf               OKF frontmatter conformance for docs/ content pages (see below)
 #   - okf-index         docs/ index-tree navigability (every dir has an index.md,

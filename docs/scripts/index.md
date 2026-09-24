@@ -9,5 +9,4 @@ Reference pages for the executables under `scripts/`. See
 - [update-config.sh](update-config.md) — update public deployment config, validate it, and optionally sync to Vercel.
 - [validate-anchor-uniqueness.mjs](validate-anchor-uniqueness.md) — report per-file edit fragility (anchor uniqueness); POC for the agent-legibility epic.
 - [validate-config.mjs](validate-config.md) — validate deployment config files against the schema.
-- [validate-pins.mjs](validate-pins.md) — enforce full-version pins in package.json.
 - [vercel-ignore-build.sh](vercel-ignore-build.md) — skip Vercel preview deploys for non-feat/fix PRs to conserve quota.
