@@ -17,16 +17,23 @@ repo **consumes** the action; it does not re-implement any policy.
 
 ## What it checks today
 
-The pinned action (v1.0.0) bundles pr-policy 0.1.0, which ships only the
-**CI-change** check: a PR that loosens CI (removes a step or job, adds
-`continue-on-error`, narrows a trigger, extends a timeout, …) gets the
-`CI approval needed` label and a failing check until a human applies
-`CI change approved`.
+The pinned action (v1.3.0) bundles pr-policy 0.2.0, which runs two checks:
 
-The **title-type** check (Conventional Commit types, `!` only on functional types,
-`ci` typing for workflow changes) is not released yet, so
+- **CI-change:** a PR that loosens CI (removes a step or job, adds
+  `continue-on-error`, narrows a trigger, extends a timeout, …) gets the
+  `CI approval needed` label, and `pr-policy` stays **pending** until a human
+  applies `CI change approved`. It's pending, not red, because no code change can
+  clear it.
+- **Title type:** the title must be a Conventional Commit, with `!` only on
+  functional types and `ci` typing for workflow changes. A bad title makes
+  `pr-policy` fail.
+
+The action also posts one informational commit status per check
+(`pr-policy / title`, `pr-policy / ci-change`), so the PR's status list shows which
+check is red or waiting. That needs the workflow's `statuses: write`.
+
 [`pr-title-lint.yml`](../../.github/workflows/pr-title-lint.yml) still gates PR
-titles.
+titles until the switch-over below.
 
 ## Why it is here — a pilot for rmartz/ai-tools#312
 
@@ -36,8 +43,8 @@ mechanics end to end: the Action installing its pinned CLI, the
 `pull_request_target` token posting the check-run and labels on Dependabot and
 fork PRs, and re-evaluation on `edited` / `labeled` / `unlabeled`.
 
-`pr-policy` is **not yet a required status**. Once the title check ships and has
-run cleanly here, the switch-over is: require `pr-policy` in the default-branch
+`pr-policy` is **not yet a required status**. Now that the title check has
+shipped, once it has run cleanly here the switch-over is: require `pr-policy` in the default-branch
 ruleset, then delete `pr-title-lint.yml` in a `ci`-typed PR.
 
 ## Why `pull_request_target`
