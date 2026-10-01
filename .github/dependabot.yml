@@ -10,11 +10,15 @@ updates:
     directory: /
     schedule:
       interval: weekly
-    # NOTE: no `cooldown` — do not re-add it (for either ecosystem). It adds
-    # friction without meeting its goal: Dependabot keeps its PRs current, so a
-    # bump to an aged release can still pull transitive deps published inside the
-    # window, and pnpm hard-fails lockfile resolution when it cannot fall back to
-    # a mature version, closing the update as `update_no_longer_possible`.
+    # NOTE: no explicit `cooldown` on npm — do not add one. It adds friction
+    # without meeting its goal: Dependabot keeps its PRs current, so a bump to an
+    # aged release can still pull transitive deps published inside the window, and
+    # pnpm hard-fails lockfile resolution when it cannot fall back to a mature
+    # version, closing the update as `update_no_longer_possible`. (Since
+    # 2026-07-14 Dependabot applies a 3-day default cooldown even with no block
+    # declared.) The github-actions entry below declares one only to exempt
+    # first-party `rmartz/*` actions and reusable workflows — published from our
+    # own repos with provenance — while third-party actions keep the default wait.
     commit-message:
       prefix: "chore"
       include: "scope"
@@ -107,6 +111,11 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    cooldown:
+      # Explicit, so declaring the block can't change the third-party default.
+      default-days: 3
+      exclude:
+        - "rmartz/*"
     commit-message:
       prefix: "chore"
       include: "scope"
