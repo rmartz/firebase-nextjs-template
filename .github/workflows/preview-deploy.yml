@@ -24,5 +24,5 @@ jobs:
     # The template repo itself has no Vercel project, so it never deploys. A repo
     # created from the template deploys as soon as its secrets are set.
     if: github.repository != 'rmartz/firebase-nextjs-template'
-    uses: rmartz/vercel-preview-ci/.github/workflows/vercel-preview.yml@PIN_SHA # PIN_VERSION
+    uses: rmartz/vercel-preview-ci/.github/workflows/vercel-preview.yml@129b1339e8b7d80f20e5af6fe6f78ea99da5ad0d # v1.0.0
     secrets: inherit
