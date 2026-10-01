@@ -29,6 +29,7 @@ import { writeFileSync } from "node:fs";
 const KNOWN_GROUPS = [
   "dev-dependencies",
   "eslint",
+  "github-actions",
   "prettier",
   "production-dependencies",
   "react",
