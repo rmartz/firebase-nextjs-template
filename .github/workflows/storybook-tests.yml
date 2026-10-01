@@ -25,11 +25,11 @@ on:
 
 permissions:
   contents: read
-  packages: read
+  packages: read # storybook-ci >= v1.2.2 declares it; a called workflow can't exceed the caller's grant
 
 jobs:
   storybook-tests:
-    uses: rmartz/storybook-ci/.github/workflows/storybook-tests.yml@731dada2cdeb712b5443c4e2b29a3065f90ffd81 # v1.2.1
+    uses: rmartz/storybook-ci/.github/workflows/storybook-tests.yml@ff758949491f6d22298273b424dd79144c5dd543 # v1.5.2
     with:
       # This repo runs its story suite through a dedicated Vitest config
       # (vitest.storybook.config.ts) rather than a `storybook` project inside
