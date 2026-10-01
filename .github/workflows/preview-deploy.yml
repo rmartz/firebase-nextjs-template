@@ -1,0 +1,28 @@
+name: Preview Deploy
+
+# Label-driven Vercel preview deploy via the shared rmartz/vercel-preview-ci
+# reusable workflow. A PR gets a preview only while it carries `UAT ready` (the
+# legacy `ready for UAT` is also accepted); the URL is posted as a sticky PR
+# comment. Vercel's Git-integration previews are disabled in vercel.json
+# (`git.deploymentEnabled`), so this is the only preview path. Gate, fork
+# safety, and per-PR concurrency live in the shared workflow:
+# https://github.com/rmartz/vercel-preview-ci/blob/main/docs/consuming.md
+#
+# Requires repo secrets: VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID.
+
+on:
+  pull_request:
+    types: [labeled, unlabeled, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  packages: read
+  pull-requests: write
+
+jobs:
+  preview:
+    # The template repo itself has no Vercel project, so it never deploys. A repo
+    # created from the template deploys as soon as its secrets are set.
+    if: github.repository != 'rmartz/firebase-nextjs-template'
+    uses: rmartz/vercel-preview-ci/.github/workflows/vercel-preview.yml@PIN_SHA # PIN_VERSION
+    secrets: inherit
