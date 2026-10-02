@@ -1,35 +1,34 @@
 # Repository hygiene gates, enforced by @rmartz/repo-hygiene. In CI they run via
-# the reusable workflow (.github/workflows/repo-hygiene.yml); locally the
-# `hygiene` / `hygiene:staged` package scripts and the pre-commit hooks run the
-# same set. The enabled checks are named explicitly (in both the workflow and
-# the scripts) — the package's default runs only conflict-markers + action-pins,
-# so the opt-in checks below must be listed to run:
+# the rmartz/repo-hygiene-action composite Action
+# (.github/workflows/repo-hygiene.yml); locally the `hygiene` / `hygiene:staged`
+# package scripts and the pre-commit hooks run the same set. The enabled checks
+# are named explicitly (in both the workflow and the scripts) so the set is
+# fixed here rather than by the package's default-on list:
 #
 #   - conflict-markers  merge-conflict markers in tracked/staged content
 #   - action-pins       every GitHub Action pinned to a SHA + full-semver comment
 #   - package-pins      every package.json dependency pinned to a full
 #                       [major].[minor].[patch] base (replaces the old local
 #                       scripts/validate-pins.mjs + "Pin format" CI job)
-#   - md-pairing        AGENTS.md / CLAUDE.md travel together, as real files
-#   - okf               OKF frontmatter conformance for docs/ content pages (see below)
+#   - md-pairing        AGENTS.md / CLAUDE.md travel together, as real files,
+#                       and every CLAUDE.md is a bare `@AGENTS.md` wrapper
+#   - okf               OKF frontmatter conformance for docs/ content pages,
+#                       including the optional field families (status, timestamps, …)
 #   - okf-index         docs/ index-tree navigability (every dir has an index.md,
 #                       every content page and sub-index is linked from it)
+#   - docs-links        relative Markdown links and #anchors in docs/ resolve
 #   - file-caps         per-glob line/byte size caps (see below)
 #
-# Only checks that need settings appear below; the rest use their defaults
-# (okf-index defaults — roots [docs], indexName index.md — already match).
-#
-# This template consolidated its previously-bespoke check scripts onto the
-# shared package. Where a centralized check does not yet cover a rule the old
-# local script enforced, an ai-tools issue tracks the gap — when it lands, bump
-# the dependency to inherit the coverage (no template change needed):
-#   - okf optional field families (status/timestamps/actors/…): rmartz/ai-tools#202
-#   - md-pairing bare `@AGENTS.md` wrapper content: rmartz/ai-tools#203
-#
-# Zero-soft-tier stance (mirrors `eslint --max-warnings 0`): every tier is an
-# error tier — no warn-only thresholds that would pass silently.
+# Zero-soft-tier stance (mirrors `eslint --max-warnings 0`): every check runs at
+# error severity and every file-caps tier is an error tier — no warn-only
+# findings that would pass silently. `okf`, `okf-index` and `md-pairing` default
+# to `warn` in the package, so each sets `severity: error` explicitly.
 checks:
+  md-pairing:
+    severity: error
+    wrapper: "@AGENTS.md"
   okf:
+    severity: error
     types: [Script, Subsystem]
     roots: [docs]
     # Index pages are the OKF directory index and carry no content frontmatter,
@@ -43,10 +42,15 @@ checks:
     # A Subsystem page documents a conceptual area rather than a single file, so
     # it needs no `resource`.
     resourceExemptTypes: [Subsystem]
+  okf-index:
+    severity: error
+  docs-links:
+    anchors: true
   file-caps:
     # Ordered, first-match-wins (most-specific first). Line caps only, born-green
-    # with no baseline — no tracked file is over cap. Markdown prose runs longer
-    # than code; generated / vendored files are effectively uncapped.
+    # with no baseline — no tracked file is over cap. Generated / vendored files
+    # are effectively uncapped; everything else, Markdown included, shares the
+    # catch-all cap, which matches eslint's `max-lines` for source files.
     overrides:
       - glob: "**/pnpm-lock.yaml"
         lines: { error: 100000 }
@@ -57,7 +61,12 @@ checks:
         lines: { error: 100000 }
       - glob: "src/components/ui/**"
         lines: { error: 1000 }
-      - glob: "**/*.md"
+      # Agent directive files only earn their keep if the model reads them in
+      # full; matches the package's shared default for these files.
+      - glob: "**/{AGENTS,CLAUDE}.md"
+        lines: { error: 300 }
+      # Test files match eslint's `max-lines` cap for specs.
+      - glob: "**/*.spec.*"
         lines: { error: 600 }
       - glob: "**/*"
-        lines: { error: 500 }
+        lines: { error: 400 }

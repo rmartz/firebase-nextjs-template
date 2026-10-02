@@ -136,10 +136,9 @@ Public (non-secret) environment config lives in `deployment/{env}.yml` and is va
 - **Every `CLAUDE.md` is a bare wrapper** whose only content is the Claude Code import line
   `@AGENTS.md` — no directives, no other text, no symlinks. This feeds the `AGENTS.md` directives
   to Claude Code while keeping them authored once.
-- The `AGENTS.md` / `CLAUDE.md` pairing is enforced in CI by `@rmartz/repo-hygiene`'s
-  `md-pairing` check (`pnpm run hygiene` / the **Repo Hygiene** workflow). The bare-`@AGENTS.md`
-  wrapper-content rule above is a convention not yet gated by the centralized check —
-  see [the repo-hygiene subsystem](docs/subsystems/repo-hygiene.md).
+- The `AGENTS.md` / `CLAUDE.md` pairing and the bare-`@AGENTS.md` wrapper content are both
+  enforced in CI by `@rmartz/repo-hygiene`'s `md-pairing` check (`pnpm run hygiene` / the
+  **Repo Hygiene** workflow) — see [the repo-hygiene subsystem](docs/subsystems/repo-hygiene.md).
 
 ## Data Access & MCP Parity
 

@@ -1,7 +1,7 @@
 ---
 type: Subsystem
 title: Repo hygiene
-description: The shared @rmartz/repo-hygiene quality gates (conflict markers, action and package.json pins, AGENTS/CLAUDE pairing, OKF frontmatter, file caps) and how they are wired into commits and CI.
+description: The shared @rmartz/repo-hygiene quality gates (conflict markers, action and package.json pins, AGENTS/CLAUDE pairing, OKF frontmatter, docs links, file caps) and how they are wired into commits and CI.
 resource: .repo-hygiene.yml
 tags: [tooling, quality-gates, ci, hygiene]
 ---
@@ -16,9 +16,9 @@ wiring so every generated repo inherits enforcement at zero per-repo setup.
 
 ## Checks
 
-Seven checks are enabled, named explicitly in both the CI workflow and the
-`hygiene` scripts — the package's default set is only `conflict-markers` +
-`action-pins`, so the rest are opt-in. Configuration lives in
+Eight checks are enabled, named explicitly in both the CI workflow and the
+`hygiene` scripts so the set is fixed here rather than by the package's
+default-on list. Configuration lives in
 [`.repo-hygiene.yml`](../../.repo-hygiene.yml):
 
 | Check              | Enforces                                                                                                         |
@@ -26,14 +26,17 @@ Seven checks are enabled, named explicitly in both the CI workflow and the
 | `conflict-markers` | No merge-conflict markers in tracked/staged content.                                                             |
 | `action-pins`      | Every GitHub Action pinned to a commit SHA with a full-semver comment.                                           |
 | `package-pins`     | Every `package.json` dependency pinned to a full `[major].[minor].[patch]` base (a `^`/`~` operator is fine).    |
-| `md-pairing`       | `AGENTS.md` and `CLAUDE.md` travel together as real files (not symlinks).                                        |
-| `okf`              | OKF frontmatter conformance for `docs/` content pages.                                                           |
+| `md-pairing`       | `AGENTS.md` and `CLAUDE.md` travel together as real files, and every `CLAUDE.md` is a bare `@AGENTS.md` wrapper. |
+| `okf`              | OKF frontmatter conformance for `docs/` content pages, including the optional field families.                    |
 | `okf-index`        | `docs/` index-tree navigability: every directory has an `index.md` that links its content pages and sub-indexes. |
+| `docs-links`       | Relative Markdown links in `docs/` resolve to an existing file and, with `anchors`, an existing heading.         |
 | `file-caps`        | Per-glob line-size caps (born-green, no baseline).                                                               |
 
-Only `okf` (the `Script` / `Subsystem` vocabulary, the docs roots, and the
-`index.md` exemptions) and `file-caps` (the ordered per-glob caps) need
-settings; the other five run on their defaults.
+Every check runs at **error** severity. `okf`, `okf-index`, and `md-pairing`
+default to `warn` in the package, which would let a finding pass CI silently, so
+the config sets `severity: error` on each. `file-caps` applies one catch-all cap
+to Markdown and code alike (matching eslint's `max-lines` for source), with
+narrower overrides for agent directive files, specs, and generated files.
 
 ## Wiring
 
@@ -65,14 +68,12 @@ to 7.0.1 were also published to GitHub Packages; newer ones exist only on npmjs.
 ## Consolidation status
 
 This template previously enforced several of these rules with bespoke scripts
-under `scripts/`; those were retired in favor of the shared package. The
-`okf-index` check (added in `@rmartz/repo-hygiene` v1.0.0) is the centralized
-port of the old `validate-docs-index.mjs`, closing the index-navigability gap.
-A couple of rules the old scripts covered are not yet centralized — tracked as
-enhancement issues so that adopting them is a dependency bump, not a re-port:
-
-- OKF optional field-family validation — [rmartz/ai-tools#202](https://github.com/rmartz/ai-tools/issues/202)
-- `md-pairing` bare `@AGENTS.md` wrapper content — [rmartz/ai-tools#203](https://github.com/rmartz/ai-tools/issues/203)
+under `scripts/`; those were retired in favor of the shared package. Every rule
+the old scripts covered is now centralized: `okf-index` ported
+`validate-docs-index.mjs`, `okf` validates the OKF optional field families
+([rmartz/ai-tools#202](https://github.com/rmartz/ai-tools/issues/202)), and
+`md-pairing`'s `wrapper` option enforces the bare `@AGENTS.md` wrapper
+([rmartz/ai-tools#203](https://github.com/rmartz/ai-tools/issues/203)).
 
 `package-pins` replaced the old `validate-pins.mjs` ([rmartz/ai-tools#315](https://github.com/rmartz/ai-tools/issues/315)).
 Unlike the old script it scans only `dependencies` / `devDependencies`, not
