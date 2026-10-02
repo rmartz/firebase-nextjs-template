@@ -6,6 +6,6 @@ Reference pages for cohesive areas of the codebase. See
 - [Deployment config](deployment-config.md) — how public env config is stored, validated, and synced, and how secrets are kept out and rotated.
 - [Edit-fragility evaluation](edit-fragility-evaluation.md) — the harness that validates the edit-fragility metric against real agent edits, and the keep-or-kill finding it produced.
 - [merge-safety](merge-safety.md) — the required "must this PR be brought current before merge?" check, a thin caller of the shared `rmartz/merge-safety` reusable workflow.
-- [pr-policy](pr-policy.md) — the shared `@rmartz/pr-policy` PR content checks, including the UAT gate; this repo is the fleet pilot, ahead of retiring `pr-title-lint.yml`.
+- [pr-policy](pr-policy.md) — the shared `@rmartz/pr-policy` PR content checks, including the UAT gate and the PR-title check that replaced `pr-title-lint.yml`.
 - [Repo hygiene](repo-hygiene.md) — the shared `@rmartz/repo-hygiene` quality gates (conflict markers, action pins, AGENTS/CLAUDE pairing, OKF frontmatter, file caps) and how they are wired.
 - [storybook-ci](storybook-ci.md) — the shared `rmartz/storybook-ci` reusable workflows behind this repo's gating Storybook tests and advisory per-PR screenshot gallery.
