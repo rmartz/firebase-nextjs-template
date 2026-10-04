@@ -117,9 +117,10 @@ project-root/
 
 1. Import your repository in the [Vercel dashboard](https://vercel.com/new)
 2. Add all environment variables from `.env.example`
-3. Deploy — Vercel handles preview deployments on PRs and production deployments on merge to `main`
+3. Deploy — Vercel deploys production on merge to `main`
+4. Add the repo secrets `VERCEL_TOKEN`, `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` (the IDs are in `.vercel/project.json` after `vercel link`), so PRs can get previews
 
-**Conserve preview-deploy quota:** preview deploys are gated by `vercel.json`'s `ignoreCommand` (`bash scripts/vercel-ignore-build.sh`) — production always builds, while PR previews build only for `feat:` / `fix:` titles, skipping `chore` / `docs` / `ci` / etc. It's committed config (no dashboard step) and active on merge. See [`docs/scripts/vercel-ignore-build.md`](docs/scripts/vercel-ignore-build.md).
+**Previews are label-driven:** a PR gets a Vercel preview only while it carries the `UAT ready` label, and it is redeployed on each push while it keeps the label. `vercel.json` turns off Vercel's Git-integration previews (`git.deploymentEnabled`) while keeping production, and [`.github/workflows/preview-deploy.yml`](.github/workflows/preview-deploy.yml) deploys the preview through the shared [`rmartz/vercel-preview-ci`](https://github.com/rmartz/vercel-preview-ci) workflow and posts the URL on the PR.
 
 ### Environment Configuration
 
@@ -148,7 +149,7 @@ Storybook CI lives in two thin caller workflows that delegate to the shared [`rm
 Additional workflows:
 
 - **Config Validation** — Validates deployment config against the schema on every PR and push to `main`
-- **PR Title Lint** — enforces Conventional-Commits PR titles
+- **pr-policy** — PR content checks via [`rmartz/pr-policy-action`](docs/subsystems/pr-policy.md), including Conventional-Commits PR titles (the `title` check, part of the required `pr-policy` check) and the UAT gate
 
 ## License
 

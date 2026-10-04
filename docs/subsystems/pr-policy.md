@@ -1,7 +1,7 @@
 ---
 type: Subsystem
 title: pr-policy
-description: The shared @rmartz/pr-policy PR content checks, run via rmartz/pr-policy-action on pull_request_target — this repo is the fleet pilot, keeps the UAT gate as a Next.js app, and is switching pr-policy to a required status in place of pr-title-lint.yml.
+description: The shared @rmartz/pr-policy PR content checks, run via rmartz/pr-policy-action on pull_request_target — this repo was the fleet pilot, keeps the UAT gate as a Next.js app, and relies on pr-policy's title check in place of the retired pr-title-lint.yml.
 resource: .github/workflows/pr-policy.yml
 tags: [ci, github-actions, pr-policy, uat]
 ---
@@ -33,16 +33,12 @@ the check suite the check-run landed in. The action also posts one
 informational status per check (`pr-policy / title`, `pr-policy / uat`, …). All
 of these need the workflow's `statuses: write`.
 
-## Why it is here — the fleet pilot
+## PR titles — pr-title-lint retired
 
-This repo runs pr-policy first, so problems surface in one repo before every
-repo requires the check. It also retires the per-repo `pr-title-lint.yml` in
-favour of pr-policy's title check (rmartz/ai-tools#312).
-
-The switch-over: once `pr-policy` has run cleanly on the current pin, require it
-in the default-branch ruleset, then delete
-[`pr-title-lint.yml`](../../.github/workflows/pr-title-lint.yml) in a
-`ci`-typed PR. Until then `pr-title-lint.yml` still gates PR titles.
+This repo was the fleet pilot for pr-policy. The switch-over is done: the
+per-repo `pr-title-lint.yml` is retired, and PR titles are checked by
+pr-policy's `title` check, part of the required `pr-policy` check
+(rmartz/ai-tools#312).
 
 ## Why `pull_request_target`
 
