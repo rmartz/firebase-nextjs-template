@@ -34,6 +34,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: rmartz/pr-policy-action@0ca9f0058db6c7e3f4a4b0154fdc4a0a68954578 # v1.4.3
+      - uses: rmartz/pr-policy-action@94c702c7f27e7753180242d9e68b966563b94a0e # v1.4.6
         with:
           pr: ${{ github.event.pull_request.number }}
