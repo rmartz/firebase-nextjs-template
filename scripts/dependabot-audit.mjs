@@ -23,10 +23,12 @@ import { execFileSync } from "node:child_process";
 import { writeFileSync } from "node:fs";
 
 // Groups Dependabot can name in a PR title — both current active groups and
-// removed historical ones. Historical names (storybook, eslint, tailwind) must
-// be kept here so that past PRs referencing those groups are classified
-// correctly; this list is NOT a mirror of the current .github/dependabot.yml.
+// removed historical ones. Historical names (storybook, eslint, prettier,
+// tailwind) must be kept here so that past PRs referencing those groups are
+// classified correctly; this list is NOT a mirror of the current
+// .github/dependabot.yml.
 const KNOWN_GROUPS = [
+  "ci",
   "dev-dependencies",
   "eslint",
   "github-actions",

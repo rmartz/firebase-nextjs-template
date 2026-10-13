@@ -69,26 +69,33 @@ updates:
       # react and vite are kept: both have merged real bumps cleanly, react must
       # span the prod/dev split, and vite's major (#207) landed green while
       # grouped — so their lockstep grouping is evidence-backed, not assumed.
+      # (eslint is grouped again below, in the `ci` group — for pr-policy's title
+      # rule, not as a lockstep family.)
       # TypeScript is the language/compiler itself, not a runtime library. A bump
       # can change type-checking behavior across the whole codebase (new errors,
       # changed inference) — a more review-worthy change than a routine dependency
       # bump — so isolate every TypeScript update in its own PR. No update-types
       # filter: patch bumps surface here too (a restriction would drop them, not
       # fall them through). The exact "typescript" pattern does not match
-      # "typescript-eslint" (that rides the dev-dependencies group).
+      # "typescript-eslint" (that rides the ci group below).
       typescript:
         patterns:
           - "typescript"
-      # Prettier (and its plugins) drive formatting output, so any bump can
-      # reformat the codebase and fail the Format check with no other visible
-      # cause. Isolate every Prettier update in its own PR for review. No
-      # update-types filter: a restriction would silently drop Prettier patch
-      # bumps (they do not fall through to dev-dependencies), leaving Prettier to
-      # drift steadily behind.
-      prettier:
+      # CI-sensitive tools in one group: pr-policy requires a `ci` title for any
+      # eslint/prettier version change (the formatter/linter can fail files a PR
+      # never touched), so they must not ride in a catch-all where they would
+      # block every routine bump. Plugins and configs move in lockstep with their
+      # tool. No update-types filter: a major brings its family with it, and a
+      # restriction would silently drop the excluded bumps rather than fall them
+      # through to dev-dependencies.
+      ci:
         patterns:
           - "prettier"
           - "prettier-plugin-*"
+          - "eslint"
+          - "eslint-*"
+          - "@eslint/*"
+          - "typescript-eslint"
       # Group only minor and patch bumps into one PR per dependency type. Major
       # bumps match no group and so are raised as individual PRs, isolating the
       # updates most likely to require code changes for handling on their own.
