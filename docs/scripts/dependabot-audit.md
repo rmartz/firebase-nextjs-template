@@ -11,9 +11,10 @@ tags: [dependencies, dependabot, ci, audit]
 Turns "which Dependabot groups are worth keeping?" into a measured question.
 
 The grouping in [`.github/dependabot.yml`](../../.github/dependabot.yml) is a set of
-bets: that isolating certain packages (`prettier`, `typescript`) keeps their
-breakages out of the shared batch, and that version-locked families (`react`,
-`vite`) must bump atomically. This script checks those bets against history — it
+bets: that isolating certain packages (`typescript`, and the CI-sensitive
+prettier/eslint families in the `ci` group) keeps their breakages out of the
+shared batch, and that version-locked families (`react`, `vite`) must bump
+atomically. This script checks those bets against history — it
 reads every Dependabot PR the repository has ever opened, classifies how each one
 ended, and reports the per-group rate at which a bump needed a human fix.
 
@@ -21,7 +22,9 @@ A group whose ungrouped members start needing fixes has earned a group; a group
 that never needs one is a candidate to drop. When `storybook`, `eslint`, and
 `tailwind` were removed as never-fired family groups (issue #222), this audit
 became the instrument that measures whether an ungrouped major of one of them
-actually breaks — the evidence that would justify re-adding it.
+actually breaks — the evidence that would justify re-adding it. (eslint has
+since joined the `ci` group, for pr-policy's `ci`-title rule rather than as a
+lockstep family, so the audit no longer measures it ungrouped.)
 
 ## Usage
 
