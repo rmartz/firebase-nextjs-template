@@ -22,7 +22,7 @@ facts and converges its labels (`approved`, `changes requested`, `blocked`,
 **No arming.** `arm-auto-merge` is off, so it never arms, merges, or updates a
 branch. It posts the `pr-lifecycle/sign-off` status with the App token, and the
 [pr-policy](pr-policy.md) gate trusts it from `rmartz-pr-lifecycle[bot]`. `bot-automerge.yml` still
-merges eligible bot PRs. Reads and label writes use the same App token.
+merges eligible bot PRs. Reads and label writes use the workflow's `GITHUB_TOKEN`.
 
 **Triggers.** It runs on `pull_request_target` and never checks out PR code.
 `workflow_run` lists the workflows behind the required checks (`CI`,
