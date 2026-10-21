@@ -36,8 +36,8 @@ of these need the workflow's `statuses: write`.
 **The `status` trigger.** pr-policy gates UAT and CI sign-off on pr-lifecycle's
 `pr-lifecycle/sign-off` commit status once a head carries one, so the caller
 also re-runs on `status`, filtered to that context. [pr-lifecycle](pr-lifecycle.md) posts it with the
-`rmartz-merge-bot` App token, which the caller trusts through
-`sign-off-status-creators: rmartz-merge-bot[bot]`. pr-policy falls back to its
+`rmartz-pr-lifecycle` App token, which the caller trusts through
+`sign-off-status-creators: rmartz-pr-lifecycle[bot]`. pr-policy falls back to its
 own classification only while a head has no status.
 
 ## PR titles — pr-title-lint retired
