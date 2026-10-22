@@ -58,8 +58,8 @@ importers:
         specifier: 10.0.1
         version: 10.0.1(eslint@10.12.0(jiti@2.7.0))
       '@rmartz/repo-hygiene':
-        specifier: 7.0.1
-        version: 7.0.1
+        specifier: 14.0.1
+        version: 14.0.1
       '@storybook/addon-a11y':
         specifier: 10.6.2
         version: 10.6.2(storybook@10.6.2(@types/react@19.3.0)(prettier@3.9.10)(react@19.3.1))
@@ -1594,8 +1594,8 @@ packages:
       react-redux:
         optional: true
 
-  '@rmartz/repo-hygiene@7.0.1':
-    resolution: {integrity: sha512-1p/3CgXWH4zoruUcg8QaeAR0KzevmVH2X8yiQzTw4e+QppsoonxyUwn24pRz/slC6u360E6Da1XMaJUMwRyO5A==}
+  '@rmartz/repo-hygiene@14.0.1':
+    resolution: {integrity: sha512-FWnkSbr/Avl3MMlUTQBQt9DFU8jSt7wEDXfoYhrGjYWJ8nTNj5G+toKlb01JSbzgqgfCgXFu+P6MCh1i/urnrA==}
     engines: {node: '>=20.11.0'}
     hasBin: true
 
@@ -7068,7 +7068,7 @@ snapshots:
       react: 19.3.1
       react-redux: 9.3.0(@types/react@19.3.0)(react@19.3.1)(redux@5.0.1)
 
-  '@rmartz/repo-hygiene@7.0.1':
+  '@rmartz/repo-hygiene@14.0.1':
     dependencies:
       gray-matter: 4.0.3
       picomatch: 4.0.7
