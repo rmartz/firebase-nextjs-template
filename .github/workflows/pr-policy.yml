@@ -15,17 +15,15 @@ name: pr-policy
 # `pr-lifecycle/sign-off` status (which sign-off this head needs), since it can
 # land after this run for the push. Like pull_request_target, a `status`
 # workflow always runs from the default branch.
+#
+# pr-lifecycle runs as the hosted rmartz-pr-lifecycle App (rmartz/pr-lifecycle-app),
+# whose installation token writes the UAT label, so its writes fire `labeled`
+# here directly; no `workflow_run` re-trigger is needed.
 
 on:
   pull_request_target:
     types: [opened, synchronize, reopened, edited, labeled, unlabeled]
   status:
-  # Re-run when the pr-lifecycle caller finishes: it writes the UAT label with
-  # GITHUB_TOKEN, which starts no `labeled` run, so require-uat-label would
-  # otherwise never see it. Like `status`, this runs from the default branch.
-  workflow_run:
-    workflows: [pr-lifecycle]
-    types: [completed]
 
 permissions:
   checks: write # post the pr-policy check-run
@@ -34,8 +32,8 @@ permissions:
   statuses: write # post the pr-policy commit status and one per policy check (pr-policy / <check>)
 
 concurrency:
-  # A status or workflow_run event has no PR number; group it by its commit.
-  group: pr-policy-${{ github.event.pull_request.number || github.event.sha || github.event.workflow_run.head_sha }}
+  # A status event has no PR number; group it by its commit.
+  group: pr-policy-${{ github.event.pull_request.number || github.event.sha }}
   cancel-in-progress: true
 
 jobs:
@@ -49,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      # On a status or workflow_run event `pr` is empty: the Action evaluates
+      # On a status event `pr` is empty: the Action evaluates
       # every open PR whose head is the event's commit.
       - uses: rmartz/pr-policy-action@0eb43793e1a79b6af2bf2eb6352067f0d03125fd # v1.9.0
         with:
