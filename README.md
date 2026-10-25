@@ -149,7 +149,6 @@ Storybook CI lives in two thin caller workflows that delegate to the shared [`rm
 Additional workflows:
 
 - **Config Validation** — Validates deployment config against the schema on every PR and push to `main`
-- **pr-policy** — PR content checks via [`rmartz/pr-policy-action`](docs/subsystems/pr-policy.md), including Conventional-Commits PR titles (the `title` check, part of the required `pr-policy` check) and the UAT gate
 
 ## License
 
