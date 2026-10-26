@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useEffectEvent } from "react";
 import {
   getDoc,
   onSnapshot,
@@ -30,26 +30,20 @@ export function useFirestoreDocument<T>(
   queryKey: QueryKey,
 ): UseQueryResult<T | undefined> {
   const queryClient = useQueryClient();
-  const queryKeyRef = useRef(queryKey);
-  queryKeyRef.current = queryKey;
-  const deserializeRef = useRef(deserialize);
-  deserializeRef.current = deserialize;
+  const onSnapshotEvent = useEffectEvent((snapshot: DocumentSnapshot) => {
+    queryClient.setQueryData(queryKey, deserialize(snapshot));
+  });
 
   useEffect(() => {
     if (!ref) return;
-    return onSnapshot(ref, (snapshot) => {
-      queryClient.setQueryData(
-        queryKeyRef.current,
-        deserializeRef.current(snapshot),
-      );
-    });
-  }, [ref, queryClient]);
+    return onSnapshot(ref, onSnapshotEvent);
+  }, [ref]);
 
   return useQuery<T | undefined>({
     queryKey,
     queryFn: async () => {
       if (!ref) throw new Error("ref is required");
-      return deserializeRef.current(await getDoc(ref));
+      return deserialize(await getDoc(ref));
     },
     enabled: ref !== undefined,
   });
