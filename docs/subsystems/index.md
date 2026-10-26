@@ -6,7 +6,7 @@ Reference pages for cohesive areas of the codebase. See
 - [Deployment config](deployment-config.md) — how public env config is stored, validated, and synced, and how secrets are kept out and rotated.
 - [Edit-fragility evaluation](edit-fragility-evaluation.md) — the harness that validates the edit-fragility metric against real agent edits, and the keep-or-kill finding it produced.
 - [Firebase](firebase.md) — the client and Admin SDK wiring: choosing RTDB or Firestore, subscription hooks, schema and serialization patterns, the emulator, and env vars.
-- [merge-safety](merge-safety.md) — the required "must this PR be brought current before merge?" check, a thin caller of the shared `rmartz/merge-safety` reusable workflow.
+- [merge-safety](merge-safety.md) — the required "must this PR be brought current before merge?" check, posted by the hosted gate App (no workflow).
 - [pr-lifecycle](pr-lifecycle.md) — the shared `@rmartz/pr-lifecycle` reconciler, run without arming by the hosted `rmartz-pr-lifecycle` App: lifecycle and UAT labels kept in step with each PR's facts.
 - [pr-policy](pr-policy.md) — the shared `@rmartz/pr-policy` PR content checks, run by the hosted gate App (no workflow), including the UAT gate and the PR-title check that replaced `pr-title-lint.yml`.
 - [Repo hygiene](repo-hygiene.md) — the shared `@rmartz/repo-hygiene` quality gates (conflict markers, action pins, AGENTS/CLAUDE pairing, OKF frontmatter, file caps) and how they are wired.
