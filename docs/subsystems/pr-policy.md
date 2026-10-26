@@ -32,7 +32,11 @@ to act. A PR's checks list has a **Re-run** button for the `pr-policy` check.
 
 **This repo keeps the UAT gate**, because it is a Next.js app with something to
 user-test. A PR stays pending until it carries `no UAT needed` (the review
-agent's call) or a person's `UAT passed`. The App runs with:
+agent's call) or a person's `UAT passed`. UAT covers only the app's
+user-facing behavior: CI and other tooling (workflows, actions, `scripts/`,
+lint, format and test config), tests, and docs are never user-facing, so they
+get `no UAT needed`, and a CI loosening needs `CI change approved` instead. The
+App runs with:
 
 - **The UAT label required.** pr-policy holds a PR that carries no UAT label, so
   every merge has an explicit UAT determination. [pr-lifecycle](pr-lifecycle.md)
