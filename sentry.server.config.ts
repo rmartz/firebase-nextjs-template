@@ -7,9 +7,27 @@ const enableSensitiveData =
 Sentry.init({
   dsn: process.env["SENTRY_DSN"],
 
-  // Sends IP addresses, cookies, and request headers. Off by default; opt in via
+  // Gates all PII-bearing collection: user info/IP, cookies, HTTP headers and
+  // bodies, database query data, AI/MCP content, and queue arguments. Off by
+  // default (the SDK defaults to collecting them); opt in via
   // SENTRY_ENABLE_SENSITIVE_DATA=true (development only).
-  sendDefaultPii: enableSensitiveData,
+  dataCollection: {
+    cookies: enableSensitiveData,
+    databaseQueryData: enableSensitiveData,
+    genAI: { inputs: enableSensitiveData, outputs: enableSensitiveData },
+    httpBodies: enableSensitiveData
+      ? [
+          "incomingRequest",
+          "incomingResponse",
+          "outgoingRequest",
+          "outgoingResponse",
+        ]
+      : [],
+    httpHeaders: enableSensitiveData,
+    mcp: { inputs: enableSensitiveData, outputs: enableSensitiveData },
+    queues: enableSensitiveData,
+    userInfo: enableSensitiveData,
+  },
   tracesSampleRate: process.env.NODE_ENV === "development" ? 1.0 : 0.1,
 
   // Attach local variable values to stack frames (development + opt-in only)
