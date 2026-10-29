@@ -61,8 +61,8 @@ importers:
         specifier: 10.0.1
         version: 10.0.1(eslint@10.13.0(jiti@2.7.0))
       '@rmartz/repo-hygiene':
-        specifier: 7.0.1
-        version: 7.0.1
+        specifier: 16.0.0
+        version: 16.0.0
       '@rolldown/plugin-babel':
         specifier: 0.2.4
         version: 0.2.4(@babel/core@7.29.7)(@babel/runtime@7.29.10)(rolldown@1.2.15)(vite@8.3.5(@types/node@26.6.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))
@@ -1639,8 +1639,8 @@ packages:
       react-redux:
         optional: true
 
-  '@rmartz/repo-hygiene@7.0.1':
-    resolution: {integrity: sha512-1p/3CgXWH4zoruUcg8QaeAR0KzevmVH2X8yiQzTw4e+QppsoonxyUwn24pRz/slC6u360E6Da1XMaJUMwRyO5A==}
+  '@rmartz/repo-hygiene@16.0.0':
+    resolution: {integrity: sha512-+pgz0iUBX8GgFFcfbP80zlUVreT/BIC5G65d9ZN8XT+4oEXcFUrlFHJbc81FsBFSZ3OYA2SvVaKp3+9Py+LKkA==}
     engines: {node: '>=20.11.0'}
     hasBin: true
 
@@ -6901,7 +6901,7 @@ snapshots:
       react: 19.3.1
       react-redux: 9.3.0(@types/react@19.3.0)(react@19.3.1)(redux@5.0.1)
 
-  '@rmartz/repo-hygiene@7.0.1':
+  '@rmartz/repo-hygiene@16.0.0':
     dependencies:
       gray-matter: 4.0.3
       picomatch: 4.0.7
