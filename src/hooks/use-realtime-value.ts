@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useEffectEvent } from "react";
 import {
   get,
   onValue,
@@ -29,26 +29,20 @@ export function useRealtimeValue<T>(
   queryKey: QueryKey,
 ): UseQueryResult<T> {
   const queryClient = useQueryClient();
-  const queryKeyRef = useRef(queryKey);
-  queryKeyRef.current = queryKey;
-  const deserializeRef = useRef(deserialize);
-  deserializeRef.current = deserialize;
+  const onValueEvent = useEffectEvent((snapshot: DataSnapshot) => {
+    queryClient.setQueryData(queryKey, deserialize(snapshot));
+  });
 
   useEffect(() => {
     if (!ref) return;
-    return onValue(ref, (snapshot) => {
-      queryClient.setQueryData(
-        queryKeyRef.current,
-        deserializeRef.current(snapshot),
-      );
-    });
-  }, [ref, queryClient]);
+    return onValue(ref, onValueEvent);
+  }, [ref]);
 
   return useQuery<T>({
     queryKey,
     queryFn: async () => {
       if (!ref) throw new Error("ref is required");
-      return deserializeRef.current(await get(ref));
+      return deserialize(await get(ref));
     },
     enabled: ref !== undefined,
   });
