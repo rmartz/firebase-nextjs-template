@@ -37,3 +37,4 @@ jobs:
       # resolve here. `build-command` and `run-build` keep their defaults
       # (`pnpm build-storybook`, enabled), which already match this repo.
       test-command: pnpm test:storybook
+      node-version: 26.x
