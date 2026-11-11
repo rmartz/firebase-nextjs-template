@@ -25,4 +25,6 @@ jobs:
     # created from the template deploys as soon as its secrets are set.
     if: github.repository != 'rmartz/firebase-nextjs-template'
     uses: rmartz/vercel-preview-ci/.github/workflows/vercel-preview.yml@d943da4477c642888591a7ddfdc1c16e5c1e6e15 # v1.4.1
+    with:
+      node-version: 26.x
     secrets: inherit
