@@ -12,7 +12,14 @@ vi.mock("firebase/database", () => ({ get: vi.fn(), onValue: vi.fn() }));
 const makeRef = () =>
   ({ toString: () => "https://test.firebaseio.com/path" }) as DatabaseReference;
 
-const makeSnapshot = (value: unknown) => ({ val: () => value }) as DataSnapshot;
+// DataSnapshot is a class, so a plain object literal can't stand in for it
+// (no-unsafe-class-instance-assignment). The hook only calls val(), so stub
+// just that method on a bare object.
+const makeSnapshot = (value: unknown) => {
+  const snapshot = Object.create(null) as DataSnapshot;
+  snapshot.val = () => value;
+  return snapshot;
+};
 
 function makeWrapper() {
   const queryClient = new QueryClient({

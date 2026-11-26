@@ -15,9 +15,6 @@ export default withSentryConfig(nextConfig, {
   // Upload wider set of client source files for better stack trace resolution
   widenClientFileUpload: true,
 
-  // Create a proxy API route to bypass ad-blockers
-  tunnelRoute: "/monitoring",
-
   // Suppress non-CI output
   silent: !process.env["CI"],
 });
