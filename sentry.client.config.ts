@@ -7,6 +7,10 @@ const enableSensitiveData =
 Sentry.init({
   dsn: process.env["NEXT_PUBLIC_SENTRY_DSN"],
 
+  // Send events through the managed same-origin tunnel (served by
+  // serveTunnelIntegration in sentry.server.config.ts) to bypass ad-blockers
+  tunnel: true,
+
   // Gates all PII-bearing collection: user info/IP, cookies, HTTP headers and
   // bodies, database query data, AI/MCP content, and queue arguments. Off by
   // default (the SDK defaults to collecting them); opt in via
