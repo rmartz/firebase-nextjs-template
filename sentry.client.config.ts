@@ -1,4 +1,5 @@
 import * as Sentry from "@sentry/nextjs";
+import { SENTRY_TUNNEL_PATH } from "./sentry.tunnel";
 
 const enableSensitiveData =
   process.env.NODE_ENV === "development" &&
@@ -9,7 +10,7 @@ Sentry.init({
 
   // Send events through the managed same-origin tunnel (served by
   // serveTunnelIntegration in sentry.server.config.ts) to bypass ad-blockers
-  tunnel: true,
+  tunnel: { path: SENTRY_TUNNEL_PATH },
 
   // Gates all PII-bearing collection: user info/IP, cookies, HTTP headers and
   // bodies, database query data, AI/MCP content, and queue arguments. Off by
