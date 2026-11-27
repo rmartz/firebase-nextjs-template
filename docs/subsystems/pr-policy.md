@@ -25,7 +25,8 @@ means a person has to act.
 
 **This repo keeps the UAT gate**, because it is a Next.js app with something to
 user-test. A PR stays pending until it carries `no UAT needed` (the call of
-the session driving the PR) or a person's `UAT passed`. The caller must not set `skip-uat`.
+the session driving the PR) or a person's `UAT passed`. The caller must not
+set `skip-uat`.
 UAT covers only the app's user-facing behavior: CI and other tooling
 (workflows, actions, `scripts/`, lint, format and test config), tests, and docs
 are never user-facing, so the gate exempts them, and a CI loosening needs
