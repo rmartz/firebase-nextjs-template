@@ -24,11 +24,11 @@ means the author has something to fix (a bad title, for example), and pending
 means a person has to act.
 
 **This repo keeps the UAT gate**, because it is a Next.js app with something to
-user-test. A PR stays pending until it carries `no UAT needed` (the review
-agent's call) or a person's `UAT passed`. The caller must not set `skip-uat`.
+user-test. A PR stays pending until it carries `no UAT needed` (the call of
+the session driving the PR) or a person's `UAT passed`. The caller must not set `skip-uat`.
 UAT covers only the app's user-facing behavior: CI and other tooling
 (workflows, actions, `scripts/`, lint, format and test config), tests, and docs
-are never user-facing, so they get `no UAT needed`, and a CI loosening needs
+are never user-facing, so the gate exempts them, and a CI loosening needs
 `CI change approved` instead.
 
 The verdict is posted twice: as the `pr-policy` check-run and as a `pr-policy`
@@ -37,17 +37,13 @@ the check suite the check-run landed in. The action also posts one
 informational status per check (`pr-policy / title`, `pr-policy / uat`, …). All
 of these need the workflow's `statuses: write`.
 
-**The `status` trigger.** pr-policy gates UAT and CI sign-off on pr-lifecycle's
-`pr-lifecycle/sign-off` commit status once a head carries one, so the caller
-also re-runs on `status`, filtered to that context. [pr-lifecycle](pr-lifecycle.md) posts it with the
-`rmartz-pr-lifecycle` App token, which the caller trusts by default
-(`sign-off-status-creators`). pr-policy falls back to its own classification only
-while a head has no status.
-
-**The UAT label is required.** With `require-uat-label: true`, pr-policy holds a PR
-that carries no UAT label, so every merge has an explicit UAT determination.
-pr-lifecycle writes that label with `GITHUB_TOKEN`, which starts no `labeled` run, so
-the caller also re-runs when the `pr-lifecycle` workflow completes (`workflow_run`).
+**Dependabot and other trivial PRs need no label.** The gate exempts a PR whose
+every path is docs, tests, CI, tooling, dependencies or repo metadata, or whose
+title is a `refactor`, so a Dependabot bump passes with no labels at all. Any
+other PR needs `no UAT needed` or `UAT passed`, applied by a user with write
+access **after the current head was pushed**; a later push re-holds it. While it
+holds, the check keeps its own `UAT needed` label on the PR. The rules are in
+[pr-policy's UAT docs](https://github.com/rmartz/pr-policy/blob/main/docs/checks/uat.md).
 
 ## PR titles — pr-title-lint retired
 
