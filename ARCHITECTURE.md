@@ -156,7 +156,7 @@ Flat config (`eslint.config.js`) with:
 
 ### Vercel
 
-- Preview deployments only for PRs labelled `UAT ready`, via `.github/workflows/preview-deploy.yml` (Git-integration previews are disabled in `vercel.json`)
+- Preview deployments only for PRs with a functional title type (`feat`, `fix`, `perf`, `revert`) or the `preview` label (`no preview` opts out), via `.github/workflows/preview-deploy.yml` (Git-integration previews are disabled in `vercel.json`)
 - Production deployment on merge to main
 - Root directory: project root (no subdirectory)
 
