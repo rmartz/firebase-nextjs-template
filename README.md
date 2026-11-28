@@ -119,8 +119,9 @@ project-root/
 2. Add all environment variables from `.env.example`
 3. Deploy — Vercel deploys production on merge to `main`
 4. Add the repo secrets `VERCEL_TOKEN`, `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` (the IDs are in `.vercel/project.json` after `vercel link`), so PRs can get previews
+5. Create the `preview` and `no preview` labels, which force or block a preview
 
-**Previews are label-driven:** a PR gets a Vercel preview only while it carries the `UAT ready` label, and it is redeployed on each push while it keeps the label. `vercel.json` turns off Vercel's Git-integration previews (`git.deploymentEnabled`) while keeping production, and [`.github/workflows/preview-deploy.yml`](.github/workflows/preview-deploy.yml) deploys the preview through the shared [`rmartz/vercel-preview-ci`](https://github.com/rmartz/vercel-preview-ci) workflow and posts the URL on the PR.
+**Previews follow the PR title:** a PR gets a Vercel preview when its title has a functional Conventional Commit type (`feat`, `fix`, `perf`, `revert`) or it carries the `preview` label, and the `no preview` label always opts it out. It is redeployed on each new push. `vercel.json` turns off Vercel's Git-integration previews (`git.deploymentEnabled`) while keeping production, and [`.github/workflows/preview-deploy.yml`](.github/workflows/preview-deploy.yml) deploys the preview through the shared [`rmartz/vercel-preview-ci`](https://github.com/rmartz/vercel-preview-ci) workflow and posts the URL on the PR.
 
 ### Environment Configuration
 
